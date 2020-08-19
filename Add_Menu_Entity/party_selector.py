@@ -1,10 +1,11 @@
 """
 ==== Description ====
-This class is used to select a supplier's register.
+This class is used to select a party for memo entry.
 
 """
 from __future__ import annotations
-from Add_Menu_Entity import register_entry, new_entry
+from Add_Menu_Entity import register_entry, new_entry, memo_entry
+from Database import Lists
 from typing import List
 import tkinter
 from tkinter import *
@@ -21,11 +22,11 @@ class Selector:
 
     """
 
-    master = ["a", "b", "c", "d", "samunder"]
+    master = Lists.party_name
 
-    def __init__(self) -> None:
+    def __init__(self, supplier_name: str, option: str) -> None:
         self.window = tkinter.Tk()
-        self.window.title("Choose Supplier")
+        self.window.title("Choose Party")
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -33,7 +34,19 @@ class Selector:
         # Creating an alias of the master copy of supplier names
         self.suppliers = self.master
 
+        # Setting option
+        self.supplier_name = supplier_name
+        self.option = option
+
     def create_main_frame(self) -> None:
+
+        # Creating supplier name label
+        supplier_name_label = Label(self.main_frame, text="Supplier Name:")
+        supplier_name_label.grid(column=1, row=0)
+
+        # Creating name label
+        supplier_name_label = Label(self.main_frame, text=self.supplier_name)
+        supplier_name_label.grid(column=2, row=0)
 
         # Creating Search Label
         search_label = Label(self.main_frame, text="Search: ")
@@ -48,7 +61,7 @@ class Selector:
         search_entry.grid(column=2, row=1)
 
         # Creating Choose Label
-        category_label = Label(self.main_frame, text="Choose a Supplier ")
+        category_label = Label(self.main_frame, text="Choose a Party ")
         category_label.grid(column=1, row=2)
 
         # Listbox scrollbar
@@ -88,7 +101,10 @@ class Selector:
 
     def on_select(self, select: str):
         self.window.destroy()
-        register_entry.execute(select)
+        if self.option == "Register Entry":
+            register_entry.execute(self.supplier_name, select)
+        else:
+            memo_entry.execute(self.supplier_name, select)
 
     def callback(self, sv: StringVar):
         self.update_list(sv.get())
@@ -102,8 +118,8 @@ class Selector:
         new_entry.execute()
 
 
-def execute() -> None:
-    new_window = Selector()
+def execute(supplier_name: str, option: str) -> None:
+    new_window = Selector(supplier_name, option)
     new_window.show_main_window()
 
 

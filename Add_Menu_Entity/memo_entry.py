@@ -5,9 +5,11 @@ database.
 
 """
 from __future__ import annotations
-from Add_Menu_Entity import new_entry
-from typing import List
+from Add_Menu_Entity import supplier_selector
+from Entities import MemoEntry
+import datetime
 import tkinter
+from tkinter import messagebox
 from tkinter import *
 
 
@@ -21,8 +23,10 @@ class AddMemoEntry:
     options: list containing all the options
 
     """
+    today = datetime.date.today()
+    date = str(today.day) + "/" + str(today.month) + "/" + str(today.year)
 
-    def __init__(self) -> None:
+    def __init__(self, supplier: str, party: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Add Memo entry")
         # Creating the main frame
@@ -30,38 +34,55 @@ class AddMemoEntry:
         # Creating bottom_frame
         self.bottom_frame = Frame(self.window)
 
-        self.show_main_window()
+        # Setting Supplier and Party
+        self.supplier_name = supplier
+        self.party_name = party
 
     def create_main_frame(self) -> None:
 
-        memo_entry_short_label = Label(self.main_frame,
-                                       text="Party Short Name: ")
-        memo_entry_short_label.grid(column=1, row=2)
+        # Creating supplier name label
+        supplier_name_label1 = Label(self.main_frame, text="Supplier Name:")
+        supplier_name_label1.grid(column=1, row=0)
 
-        # Creating memo_entry name entry
-        memo_entry_short_entry = Entry(self.main_frame, width=100)
-        memo_entry_short_entry.grid(column=2, row=2)
+        # Creating name label
+        supplier_name_label2 = Label(self.main_frame, text=self.supplier_name)
+        supplier_name_label2.grid(column=2, row=0)
 
-        # Creating memo_entry address label
-        memo_entry_address_label = Label(self.main_frame,
-                                             text="Supplier Short Name: ")
-        memo_entry_address_label.grid(column=1, row=3)
+        # Creating party name label
+        party_name_label1 = Label(self.main_frame, text="Party Name: ")
 
-        # Creating memo_entry address entry
-        memo_entry_address_entry = Entry(self.main_frame, width=100)
-        memo_entry_address_entry.grid(column=2, row=3)
+        party_name_label1.grid(column=1, row=2)
 
-        # Creating memo_entry address label
+        # Creating name Label
+        party_name_label2 = Label(self.main_frame,
+                                  text=self.party_name)
+
+        party_name_label2.grid(column=2, row=2)
+
+
+        # Creating memo_entry amount label
         memo_entry_address_label = Label(self.main_frame,
                                              text="Amount: ")
         memo_entry_address_label.grid(column=1, row=4)
 
-        # Creating memo_entry address entry
+        # Creating memo_entry amount entry
         memo_entry_address_entry = Entry(self.main_frame, width=100)
         memo_entry_address_entry.grid(column=2, row=4)
 
+        # Creating date label
+        date_label = Label(self.main_frame, text="Date: ")
+        date_label.grid(column=1, row=5)
+
+        # Creating date entry
+        date_entry = Entry(self.main_frame, width=100)
+        date_entry.insert(0, self.date)
+        date_entry.grid(column=2, row=5)
+
         # Creating create button
-        create_button = Button(self.bottom_frame, text="Create")
+        create_button = Button(self.bottom_frame, text="Create",
+                               command=lambda: self.create_button(
+                                   memo_entry_address_entry.get(),
+                                   date_entry.get()))
         create_button.grid(column=0, row=0, ipadx=20)
 
         # Creating back button
@@ -76,11 +97,23 @@ class AddMemoEntry:
         self.create_main_frame()
         self.window.mainloop()
 
+    def create_button(self, amount: str, date: str) -> None:
+
+        try:
+            int_amount = int(amount)
+            memo = MemoEntry.call(self.supplier_name, self.party_name,
+                                  int_amount)
+            print(memo.supplier_name)
+        except ValueError:
+            messagebox.showwarning(title="Error",
+                                   message="Invalid Amount Entered")
+            print("Invalid Amount Entered")
+
     def back_button(self)-> None:
         self.window.destroy()
-        new_entry.execute()
+        supplier_selector.execute("Memo Entry")
 
 
-def execute() -> None:
-    new_window = AddMemoEntry()
+def execute(supplier: str, party: str) -> None:
+    new_window = AddMemoEntry(supplier, party)
     new_window.show_main_window()

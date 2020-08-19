@@ -28,17 +28,23 @@ class RegisterEntry:
     # do we decided the bill number or is it predefined
     bill_number: int
     amount: int
-    date: datetime
-    supplier: Supplier
-    party: Party
+    date: str
+    supplier_name: str
+    party_name: str
 
-    def __init__(self, bill: int, amount: int, party: Party, supplier: Supplier):
+    def __init__(self, bill: int, amount: int, party: str, supplier: str,
+                 date: str) -> None:
         self.bill_number = bill
         self.amount = amount
-        self.party = party
-        self.supplier = supplier
-        self.date = datetime.date.today()
+        self.party_name = party
+        self.supplier_name = supplier
+        self.date = date
+        self.status = "N"
+        self.part_payment = 0
 
+
+def call(bill: int, amount: int, party: str, supplier: str,  date: str) -> RegisterEntry:
+    return RegisterEntry(bill, amount, party, supplier, date)
 
 
 

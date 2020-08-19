@@ -5,9 +5,11 @@ database.
 
 """
 from __future__ import annotations
-from Add_Menu_Entity import open_register
+from Add_Menu_Entity import supplier_selector
+from Entities import RegisterEntry
 from typing import List
 import tkinter
+from tkinter import messagebox
 from tkinter import *
 import datetime
 
@@ -25,7 +27,7 @@ class AddRegisterEntry:
     today = datetime.date.today()
     date = str(today.day) + "/" + str(today.month) + "/" + str(today.year)
 
-    def __init__(self, supplier_name: str) -> None:
+    def __init__(self, supplier_name: str, party_name: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Add register_entry")
         # Creating the main frame
@@ -34,7 +36,7 @@ class AddRegisterEntry:
         self.bottom_frame = Frame(self.window)
 
         self.supplier_name = supplier_name
-
+        self.party_name = party_name
 
     def create_main_frame(self) -> None:
 
@@ -59,15 +61,16 @@ class AddRegisterEntry:
         register_entry_short_label.grid(column=1, row=2)
 
         # Creating register_entry name entry
-        register_entry_short_entry = Entry(self.main_frame, width=100)
-        register_entry_short_entry.grid(column=2, row=2)
+        register_entry_short_entry_text = Label(self.main_frame,
+                                                text=self.party_name)
+        register_entry_short_entry_text.grid(column=2, row=2)
 
-        # Creating register_entry address label
+        # Creating register_entry amount label
         register_entry_address_label = Label(self.main_frame,
                                              text="Amount: ")
         register_entry_address_label.grid(column=1, row=4)
 
-        # Creating register_entry address entry
+        # Creating register_entry amount entry
         register_entry_address_entry = Entry(self.main_frame, width=100)
         register_entry_address_entry.grid(column=2, row=4)
 
@@ -81,12 +84,15 @@ class AddRegisterEntry:
         date_entry.grid(column=2, row=5)
 
         # Creating create button
-        create_button = Button(self.bottom_frame, text="Create")
+        create_button = Button(self.bottom_frame, text="Create",
+                               command=lambda: self.create_button(
+                                   register_entry_address_entry.get(),
+                                   date_entry.get()))
         create_button.grid(column=0, row=0, ipadx=20)
 
         # Creating back button
         back_button = Button(self.bottom_frame, text="<<Back",
-                             command = lambda:self.back_button())
+                             command=lambda: self.back_button())
         back_button.grid(column=2, row=0, padx=90, ipadx=20)
 
         self.main_frame.grid(column=0, row=0)
@@ -96,13 +102,25 @@ class AddRegisterEntry:
         self.create_main_frame()
         self.window.mainloop()
 
+    def create_button(self, amount: str, date: str) -> None:
+
+        try:
+            int_amount = int(amount)
+            register = RegisterEntry.call(self.supplier_name, self.party_name,
+                                          int_amount, date)
+            print(register.supplier_name)
+        except ValueError:
+            messagebox.showwarning(title="Error",
+                                   message="Invalid Amount Entered")
+            print("Invalid Amount Entered")
+
     def back_button(self)-> None:
         self.window.destroy()
-        open_register.execute()
+        supplier_selector.execute("Register Entry")
 
 
-def execute(name: str) -> None:
-    new_window = AddRegisterEntry(name)
+def execute(supplier_name: str, party_name: str) -> None:
+    new_window = AddRegisterEntry(supplier_name, party_name)
     new_window.show_main_window()
 
 

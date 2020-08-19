@@ -6,7 +6,7 @@ database.
 """
 
 from __future__ import annotations
-from Add_Menu_Entity import open_register, memo_entry
+from Add_Menu_Entity import supplier_selector, memo_entry
 from typing import List
 import tkinter
 from tkinter import *
@@ -59,12 +59,8 @@ class AddWindow:
 
     def on_select(self, select: str):
 
-        if select == "Register Entry":
-            self.window.destroy()
-            open_register.execute()
-        else:
-            self.window.destroy()
-            memo_entry.execute()
+        self.window.destroy()
+        supplier_selector.execute(select)
 
     def show_main_window(self) -> None:
         self.create_main_frame()
