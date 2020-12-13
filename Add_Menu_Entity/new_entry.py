@@ -7,6 +7,7 @@ database.
 
 from __future__ import annotations
 from Add_Menu_Entity import supplier_selector, memo_entry
+from Main import MainMenu
 from typing import List
 import tkinter
 from tkinter import *
@@ -51,7 +52,8 @@ class AddWindow:
         select_button.grid(column=3, row=1)
 
         # Creating back button
-        back_button = Button(self.bottom_frame, text="<<Back")
+        back_button = Button(self.bottom_frame, text="<<Back",
+                             command=lambda: self.back())
         back_button.pack()
 
         self.main_frame.grid(column=0, row=0)
@@ -61,6 +63,10 @@ class AddWindow:
 
         self.window.destroy()
         supplier_selector.execute(select)
+
+    def back(self):
+        self.window.destroy()
+        MainMenu.execute()
 
     def show_main_window(self) -> None:
         self.create_main_frame()

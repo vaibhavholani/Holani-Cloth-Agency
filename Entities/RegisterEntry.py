@@ -6,6 +6,8 @@ the bill for an order is received.
 """
 
 from __future__ import annotations
+from Database import Lists
+from typing import List
 from Indivijuval import Supplier, Party
 import datetime
 
@@ -28,23 +30,40 @@ class RegisterEntry:
     # do we decided the bill number or is it predefined
     bill_number: int
     amount: int
-    date: str
+    date: datetime
+    payment_date: List[datetime]
+    gr_date: List[datetime]
     supplier_name: str
     party_name: str
+    goods_return: int
 
-    def __init__(self, bill: int, amount: int, party: str, supplier: str,
+    def __init__(self, bill: int, amount: int, supplier: str, party: str,
                  date: str) -> None:
+
         self.bill_number = bill
         self.amount = amount
         self.party_name = party
         self.supplier_name = supplier
-        self.date = date
+        self.date = datetime.datetime.strptime(date, "%d/%m/%Y")
+        self.payment_date = []
+        self.gr_date = []
         self.status = "N"
         self.part_payment = 0
+        self.gr_amount = 0
+
+    def trial_status(self):
+        self.status = "P"
 
 
-def call(bill: int, amount: int, party: str, supplier: str,  date: str) -> RegisterEntry:
-    return RegisterEntry(bill, amount, party, supplier, date)
+def call(bill: int, amount: int, supplier: str, party: str,  date: str) -> RegisterEntry:
+    register = RegisterEntry(bill, amount, supplier, party, date)
+    Lists.insert_data(register)
+    return register
+
+
+
+
+
 
 
 

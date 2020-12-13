@@ -5,9 +5,11 @@ database.
 
 """
 from __future__ import annotations
-from typing import List
+from Indivijuval import Supplier
+from Add_Menu_Indi import Add_Menu
 import tkinter
 from tkinter import *
+from tkinter import messagebox
 
 
 class AddSupplier:
@@ -51,17 +53,40 @@ class AddSupplier:
         supplier_address_label = Label(self.main_frame,
                                        text="Supplier Address: ")
         supplier_address_label.grid(column=1, row=3)
+        supplier_address_label = Label(self.main_frame,
+                                       text="Address Line 2: ")
+        supplier_address_label.grid(column=1, row=4)
+        supplier_address_label = Label(self.main_frame,
+                                       text="Address Line 3: ")
+        supplier_address_label.grid(column=1, row=5)
+
 
         # Creating supplier address entry
-        supplier_address_entry = Entry(self.main_frame, width=100)
-        supplier_address_entry.grid(column=2, row=3)
+        supplier_address_entry1 = Entry(self.main_frame, width=100)
+        supplier_address_entry1.grid(column=2, row=3)
+
+        # Creating supplier address entry
+        supplier_address_entry2 = Entry(self.main_frame, width=100)
+        supplier_address_entry2.grid(column=2, row=4)
+
+        # Creating supplier address entry
+        supplier_address_entry3 = Entry(self.main_frame, width=100)
+        supplier_address_entry3.grid(column=2, row=5)
 
         # Creating create button
-        create_button = Button(self.bottom_frame, text="Create")
-        create_button.grid(column=0, row=0, ipadx=20)
+        button = Button(self.bottom_frame, text="Create",
+                        command=lambda: create_button(
+                                   supplier_name_entry.get(),
+                                   supplier_short_entry.get(),
+                                   supplier_address_entry1.get(),
+                                   supplier_address_entry2.get(),
+                                   supplier_address_entry3.get()))
+
+        button.grid(column=0, row=0, ipadx=20)
 
         # Creating back button
-        back_button = Button(self.bottom_frame, text="<<Back")
+        back_button = Button(self.bottom_frame, text="<<Back",
+                             command=lambda: self.back())
         back_button.grid(column=2, row=0, padx=90, ipadx=20)
 
         self.main_frame.grid(column=0, row=0)
@@ -71,6 +96,23 @@ class AddSupplier:
         self.create_main_frame()
         self.window.mainloop()
 
+    def back(self):
+        self.window.destroy()
+        Add_Menu.execute()
 
-new_window = AddSupplier()
-new_window.show_main_window()
+
+def create_button(name: str, short_name: str, add1: str, add2: str, add3: str):
+
+    if len(name) == 0 or len(short_name) == 0 or len(add1) == 0:
+        messagebox.showwarning(title="Error",
+                               message=" Please fill the name, short name"
+                                       " and Address Fields!")
+    else:
+        address = add1 + "\n" + add2 + "\n" + add3
+        Supplier.create_supplier(name, short_name, address)
+        # Add into database
+
+
+def execute():
+    new_window = AddSupplier()
+    new_window.show_main_window()

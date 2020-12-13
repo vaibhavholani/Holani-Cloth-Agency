@@ -5,7 +5,8 @@ database.
 
 """
 from __future__ import annotations
-from typing import List
+from Main import MainMenu
+from Add_Menu_Indi import add_bank, add_party, add_supplier, add_transporter
 import tkinter
 from tkinter import *
 
@@ -21,7 +22,7 @@ class AddWindow:
 
     """
 
-    options = ["Supplier", "Party", "Transporter", "register_entry"]
+    options = ["Supplier", "Party", "Transporter", "Bank"]
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
@@ -44,23 +45,40 @@ class AddWindow:
         category_spinner.grid(column=2, row=1)
 
         # Creating Select Button
-        select_button = Button(self.main_frame, text="Select", command= self.on_select(category_spinner.get()))
+        select_button = Button(self.main_frame, text="Select",
+                               command=lambda: self.on_select
+                               (category_spinner.get()))
+
         select_button.grid(column=3, row=1)
 
         # Creating back button
-        back_button = Button(self.bottom_frame, text="<<Back")
+        back_button = Button(self.bottom_frame, text="<<Back",
+                             command=lambda: self.back())
         back_button.pack()
 
         self.main_frame.grid(column=0, row=0)
         self.bottom_frame.grid(column=0, row=1)
 
-    def on_select(self, select: int):
-        pass
+    def on_select(self, select: str):
+        self.window.destroy()
+        if select == self.options[0]:
+            add_supplier.execute()
+        elif select == self.options[1]:
+            add_party.execute()
+        elif select == self.options[2]:
+            add_transporter.execute()
+        else:
+            add_bank.execute()
+
+    def back(self):
+        self.window.destroy()
+        MainMenu.execute()
 
     def show_main_window(self) -> None:
         self.create_main_frame()
         self.window.mainloop()
 
 
-new_window = AddWindow()
-new_window.show_main_window()
+def execute():
+    new_window = AddWindow()
+    new_window.show_main_window()

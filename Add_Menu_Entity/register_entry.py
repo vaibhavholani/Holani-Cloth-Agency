@@ -86,6 +86,7 @@ class AddRegisterEntry:
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
                                command=lambda: self.create_button(
+                                   register_entry_name_entry.get(),
                                    register_entry_address_entry.get(),
                                    date_entry.get()))
         create_button.grid(column=0, row=0, ipadx=20)
@@ -102,19 +103,22 @@ class AddRegisterEntry:
         self.create_main_frame()
         self.window.mainloop()
 
-    def create_button(self, amount: str, date: str) -> None:
+    def create_button(self, bill: str, amount: str, date: str) -> None:
 
         try:
+            int_bill = int(bill)
             int_amount = int(amount)
-            register = RegisterEntry.call(self.supplier_name, self.party_name,
-                                          int_amount, date)
+            register = RegisterEntry.call(int_bill, int_amount,
+                                          self.supplier_name, self.party_name,
+                                          date)
             print(register.supplier_name)
         except ValueError:
             messagebox.showwarning(title="Error",
-                                   message="Invalid Amount Entered")
+                                   message="Invalid Amount or "
+                                           "Bill Number Entered")
             print("Invalid Amount Entered")
 
-    def back_button(self)-> None:
+    def back_button(self) -> None:
         self.window.destroy()
         supplier_selector.execute("Register Entry")
 

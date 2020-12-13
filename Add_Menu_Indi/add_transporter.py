@@ -5,9 +5,11 @@ database.
 
 """
 from __future__ import annotations
-from typing import List
+from Add_Menu_Indi import Add_Menu
 import tkinter
 from tkinter import *
+from tkinter import messagebox
+from Indivijuval import Transporter
 
 
 class AddTransporter:
@@ -41,13 +43,6 @@ class AddTransporter:
         transporter_name_entry = Entry(self.main_frame, width=100)
         transporter_name_entry.grid(column=2, row=1)
 
-        transporter_short_label = Label(self.main_frame, text="Short name: ")
-        transporter_short_label.grid(column=1, row=2)
-
-        # Creating transporter name entry
-        transporter_short_entry = Entry(self.main_frame, width=100)
-        transporter_short_entry.grid(column=2, row=2)
-
         # Creating transporter address label
         transporter_address_label = Label(self.main_frame,
                                           text="Transporter Address: ")
@@ -58,11 +53,16 @@ class AddTransporter:
         transporter_address_entry.grid(column=2, row=3)
 
         # Creating create button
-        create_button = Button(self.bottom_frame, text="Create")
+        create_button = Button(self.bottom_frame, text="Create",
+                               command=lambda:
+                               create(transporter_name_entry.get(),
+                                      transporter_address_entry.get()))
+
         create_button.grid(column=0, row=0, ipadx=20)
 
         # Creating back button
-        back_button = Button(self.bottom_frame, text="<<Back")
+        back_button = Button(self.bottom_frame, text="<<Back",
+                             command=lambda: self.back())
         back_button.grid(column=2, row=0, padx=90, ipadx=20)
 
         self.main_frame.grid(column=0, row=0)
@@ -72,6 +72,20 @@ class AddTransporter:
         self.create_main_frame()
         self.window.mainloop()
 
+    def back(self):
+        self.window.destroy()
+        Add_Menu.execute()
 
-new_window = AddTransporter()
-new_window.show_main_window()
+
+def create(name: str, address: str):
+    if len(name) == 0 or len(address) == 0:
+        messagebox.showwarning(title="Error",
+                               message=" Please fill the name, short name"
+                               " and Address Fields!")
+    else:
+        Transporter.create_transporter(name, address)
+        # Database here
+
+def execute():
+    new_window = AddTransporter()
+    new_window.show_main_window()

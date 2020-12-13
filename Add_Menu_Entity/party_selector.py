@@ -4,7 +4,7 @@ This class is used to select a party for memo entry.
 
 """
 from __future__ import annotations
-from Add_Menu_Entity import register_entry, new_entry, memo_entry
+from Add_Menu_Entity import register_entry, new_entry, memo_entry_new
 from Database import Lists
 from typing import List
 import tkinter
@@ -22,7 +22,7 @@ class Selector:
 
     """
 
-    master = Lists.party_name
+    master = Lists.party_names
 
     def __init__(self, supplier_name: str, option: str) -> None:
         self.window = tkinter.Tk()
@@ -104,7 +104,7 @@ class Selector:
         if self.option == "Register Entry":
             register_entry.execute(self.supplier_name, select)
         else:
-            memo_entry.execute(self.supplier_name, select)
+            memo_entry_new.execute(self.supplier_name, select)
 
     def callback(self, sv: StringVar):
         self.update_list(sv.get())
