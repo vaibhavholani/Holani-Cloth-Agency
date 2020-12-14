@@ -20,7 +20,7 @@ class AddMemoEntry:
     ===Attributes===
 
     window: container for all objects
-    options: list containing all the options
+    options: list containing all the options!
 
     """
     today = datetime.date.today()
