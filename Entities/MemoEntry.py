@@ -52,7 +52,12 @@ class MemoEntry:
     def partial_payment_bill(self):
 
         for bills in self.selected_bills:
-            bills.status = "P"
+            if bills.status == "P" and bills.amount - self.amount:
+                bills.status = "F"
+            elif bills.status == "N":
+                bills.status = "P"
+            elif bills.status == "PG" or bills.status == "G":
+                bills.status = "PG"
             bills.part_payment = self.amount
             bills.payment_date.append(self.date)
 
@@ -63,7 +68,13 @@ class MemoEntry:
     def goods_return(self):
 
         for bills in self.selected_bills:
-            bills.status = "P"
+            if (bills.status == "P" or bills.status == "PG") and \
+                    bills.amount-self.amount:
+                bills.status = "F"
+            elif bills.status == "P" or bills.status == "PG":
+                bills.status = "PG"
+            elif bills.status == "N":
+                bills.status = "G"
             bills.gr_amount = self.amount
             bills.amount = bills.amount - self.amount
             bills.gr_date.append(self.date)

@@ -204,6 +204,14 @@ class AddMemoEntry:
             elif pick.status == "P":
                 text = text + "  |  Part Paid: INR {}".format(pick.part_payment)
                 self.checkbutton(text, "blue")
+            elif pick.status == "PG":
+                text = text + "  |  Part Paid: INR {} | GR Amount: INR {}".\
+                    format(pick.part_payment, pick.gr_amount)
+                self.checkbutton(text, "green")
+            elif pick.status == "G":
+                text = text + "  |  GR Amount: INR {}".\
+                    format(pick.gr_amount)
+                self.checkbutton(text, "green")
 
         self.right_frame.grid(column=1, row=0, rowspan=3, sticky=NSEW)
 
