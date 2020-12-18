@@ -10,6 +10,7 @@ from Indivijuval import Bank
 import tkinter
 from tkinter import *
 from tkinter import messagebox
+from Database import insert_individual
 
 
 class AddBank:
@@ -52,7 +53,7 @@ class AddBank:
 
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
-                               command=lambda: create
+                               command=lambda: self.create
                                (bank_name_entry.get(),
                                 bank_address_entry.get()))
 
@@ -74,16 +75,17 @@ class AddBank:
         self.window.destroy()
         Add_Menu.execute()
 
-
-def create(name: str, address: str):
-    if len(name) == 0 or len(address) == 0:
-        messagebox.showwarning(title="Error",
-                               message=" Please fill the name, short name"
-                               " and Address Fields!")
-    else:
-        Bank.create_bank(name, address)
-        # Database here
-
+    def create(self, name: str, address: str):
+        if len(name) == 0 or len(address) == 0:
+            messagebox.showwarning(title="Error",
+                                   message=" Please fill the name, short name"
+                                           " and Address Fields!")
+        else:
+            bank = Bank.create_bank(name, address)
+            # Database here
+            insert_individual.insert_bank(bank)
+            messagebox.showinfo(title="Complete", message="Bank Added!")
+            self.back()
 
 def execute():
     new_window = AddBank()

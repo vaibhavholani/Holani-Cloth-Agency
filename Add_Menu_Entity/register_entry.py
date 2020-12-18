@@ -5,9 +5,9 @@ database.
 
 """
 from __future__ import annotations
-from Add_Menu_Entity import supplier_selector
+from Add_Menu_Entity import party_selector
 from Entities import RegisterEntry
-from typing import List
+from Database import retrieve_indivijual
 import tkinter
 from tkinter import messagebox
 from tkinter import *
@@ -111,7 +111,6 @@ class AddRegisterEntry:
             register = RegisterEntry.call(int_bill, int_amount,
                                           self.supplier_name, self.party_name,
                                           date)
-            print(register.supplier_name)
         except ValueError:
             messagebox.showwarning(title="Error",
                                    message="Invalid Amount or "
@@ -120,7 +119,7 @@ class AddRegisterEntry:
 
     def back_button(self) -> None:
         self.window.destroy()
-        supplier_selector.execute("Register Entry")
+        party_selector.execute(self.supplier_name, "Register Entry")
 
 
 def execute(supplier_name: str, party_name: str) -> None:

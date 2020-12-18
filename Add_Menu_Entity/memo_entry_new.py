@@ -198,7 +198,7 @@ class AddMemoEntry:
 
         for pick in self.pending_bill:
             text = "#" + str(pick.bill_number) + ", Amount: INR " + str(
-                pick.amount - pick.part_payment)
+                pick.amount - (pick.part_payment + pick.gr_amount))
             if pick.status == "N":
                 self.checkbutton(text, "red")
             elif pick.status == "P":
@@ -207,7 +207,7 @@ class AddMemoEntry:
             elif pick.status == "PG":
                 text = text + "  |  Part Paid: INR {} | GR Amount: INR {}".\
                     format(pick.part_payment, pick.gr_amount)
-                self.checkbutton(text, "green")
+                self.checkbutton(text, "purple")
             elif pick.status == "G":
                 text = text + "  |  GR Amount: INR {}".\
                     format(pick.gr_amount)
@@ -257,13 +257,22 @@ class AddMemoEntry:
 
             if self.selected_mode == 1:
                 self.memo_full(int_memo_number, int_amount, date)
+                messagebox.showinfo(title="Complete", message="Memo Added!")
+                self.window.destroy()
+                execute(self.supplier_name, self.party_name)
             elif self.selected_mode == 2:
                 if self.selected_partial == 1:
                     self.memo_partial_bill(int_memo_number, int_amount, date)
                 else:
                     self.memo_partial_random(int_memo_number, int_amount, date)
+                messagebox.showinfo(title="Complete", message="Memo Added!")
+                self.window.destroy()
+                execute(self.supplier_name, self.party_name)
             elif self.selected_mode == 3:
                 self.memo_goods_return(int_memo_number, int_amount, date)
+                messagebox.showinfo(title="Complete", message="Memo Added!")
+                self.window.destroy()
+                execute(self.supplier_name, self.party_name)
             else:
                 messagebox.showwarning(title="Error",
                                        message=
@@ -329,7 +338,7 @@ class AddMemoEntry:
                               self.party_name,
                               amount, date, self.selected_bills)
 
-    def back_button(self)-> None:
+    def back_button(self) -> None:
         self.window.destroy()
         party_selector.execute(self.supplier_name, "Memo Entry")
 
@@ -385,7 +394,7 @@ class AddMemoEntry:
         else:
             self.partial_frame.grid_forget()
 
-    def total_outstanding(self)-> int:
+    def total_outstanding(self) -> int:
         total = 0
         for bill in self.pending_bill:
             if bill.status == "N" or bill.status == "P":

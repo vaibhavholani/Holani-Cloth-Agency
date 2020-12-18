@@ -10,6 +10,7 @@ import tkinter
 from tkinter import *
 from tkinter import messagebox
 from Indivijuval import Transporter
+from Database import insert_individual
 
 
 class AddTransporter:
@@ -55,7 +56,7 @@ class AddTransporter:
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
                                command=lambda:
-                               create(transporter_name_entry.get(),
+                               self.create(transporter_name_entry.get(),
                                       transporter_address_entry.get()))
 
         create_button.grid(column=0, row=0, ipadx=20)
@@ -76,15 +77,20 @@ class AddTransporter:
         self.window.destroy()
         Add_Menu.execute()
 
+    def create(self, name: str, address: str):
+        if len(name) == 0 or len(address) == 0:
+            messagebox.showwarning(title="Error",
+                                   message=" Please fill the name, short name"
+                                           " and Address Fields!")
+        else:
+            transport = Transporter.create_transporter(name, address)
+            # Database here
+            insert_individual.insert_transporter(transport)
+            messagebox.showinfo(title="Complete", message="Transporter Added!")
+            self.back()
 
-def create(name: str, address: str):
-    if len(name) == 0 or len(address) == 0:
-        messagebox.showwarning(title="Error",
-                               message=" Please fill the name, short name"
-                               " and Address Fields!")
-    else:
-        Transporter.create_transporter(name, address)
-        # Database here
+
+
 
 def execute():
     new_window = AddTransporter()

@@ -4,9 +4,8 @@ This class is used to select a party for memo entry.
 
 """
 from __future__ import annotations
-from Add_Menu_Entity import register_entry, new_entry, memo_entry_new
+from Add_Menu_Entity import register_entry, memo_entry_new, supplier_selector
 from Database import Lists
-from typing import List
 import tkinter
 from tkinter import *
 
@@ -115,7 +114,7 @@ class Selector:
 
     def back_button(self) -> None:
         self.window.destroy()
-        new_entry.execute()
+        supplier_selector.execute(self.option)
 
 
 def execute(supplier_name: str, option: str) -> None:

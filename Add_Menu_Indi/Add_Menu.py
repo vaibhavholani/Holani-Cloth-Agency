@@ -82,3 +82,4 @@ class AddWindow:
 def execute():
     new_window = AddWindow()
     new_window.show_main_window()
+

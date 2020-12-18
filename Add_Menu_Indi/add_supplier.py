@@ -10,6 +10,7 @@ from Add_Menu_Indi import Add_Menu
 import tkinter
 from tkinter import *
 from tkinter import messagebox
+from Database import insert_individual
 
 
 class AddSupplier:
@@ -75,7 +76,7 @@ class AddSupplier:
 
         # Creating create button
         button = Button(self.bottom_frame, text="Create",
-                        command=lambda: create_button(
+                        command=lambda: self.create_button(
                                    supplier_name_entry.get(),
                                    supplier_short_entry.get(),
                                    supplier_address_entry1.get(),
@@ -100,17 +101,22 @@ class AddSupplier:
         self.window.destroy()
         Add_Menu.execute()
 
+    def create_button(self, name: str, short_name: str, add1: str, add2: str, add3: str):
 
-def create_button(name: str, short_name: str, add1: str, add2: str, add3: str):
+        if len(name) == 0 or len(short_name) == 0 or len(add1) == 0:
+            messagebox.showwarning(title="Error",
+                                   message=" Please fill the name, short name"
+                                           " and Address Fields!")
+        else:
+            address = add1 + ", " + add2 + ", " + add3
+            supplier = Supplier.create_supplier(name, short_name, address)
+            # Add into database
+            insert_individual.insert_supplier(supplier)
+            messagebox.showinfo(title="Complete", message="Supplier Added!")
+            self.back()
 
-    if len(name) == 0 or len(short_name) == 0 or len(add1) == 0:
-        messagebox.showwarning(title="Error",
-                               message=" Please fill the name, short name"
-                                       " and Address Fields!")
-    else:
-        address = add1 + "\n" + add2 + "\n" + add3
-        Supplier.create_supplier(name, short_name, address)
-        # Add into database
+
+
 
 
 def execute():
