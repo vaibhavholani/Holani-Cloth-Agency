@@ -26,6 +26,9 @@ class AddSupplier:
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
+        self.window.geometry("700x700")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
         self.window.title("Add supplier")
         # Creating the main frame
         self.main_frame = Frame(self.window)
@@ -60,7 +63,6 @@ class AddSupplier:
         supplier_address_label = Label(self.main_frame,
                                        text="Address Line 3: ")
         supplier_address_label.grid(column=1, row=5)
-
 
         # Creating supplier address entry
         supplier_address_entry1 = Entry(self.main_frame, width=100)

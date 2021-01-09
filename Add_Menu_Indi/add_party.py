@@ -26,6 +26,9 @@ class AddParty:
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
+        self.window.geometry("700x700")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
         self.window.title("Add Party")
         # Creating the main frame
         self.main_frame = Frame(self.window)
@@ -76,6 +79,12 @@ class AddParty:
         # Creating create button
         create = Button(self.bottom_frame, text="Create",
                         command=lambda: self.create_button(
+                                   party_name_entry.get(),
+                                   party_short_entry.get(),
+                                   party_address_entry1.get(),
+                                   party_address_entry2.get(),
+                                   party_address_entry3.get()))
+        create.bind("<Return>", lambda event: self.create_button(
                                    party_name_entry.get(),
                                    party_short_entry.get(),
                                    party_address_entry1.get(),

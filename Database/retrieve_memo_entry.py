@@ -1,39 +1,63 @@
 from __future__ import annotations
 from Entities import MemoEntry
 from Database import db_connector
+import datetime
 
 
-def check_new_memo(memo: MemoEntry) -> bool:
+def check_new_memo(memo_number: int, memo_date: str) -> bool:
     """
     Check if the memo already exists.
     """
+    # Open a new connection
     db = db_connector.connect()
     cursor = db.cursor()
+    date = datetime.datetime.strptime(memo_date, "%d/%m/%Y")
 
-    query = "select id from memo_entry where memo_number = '{}' AND supplier_id = '{}' AND party_id = '{}'".format(
-        memo.memo_number, memo.supplier_id, memo.party_id)
+    query = "select register_date from memo_entry where memo_number = '{}' order by 1 DESC".format(
+             memo_number)
     cursor.execute(query)
     data = cursor.fetchall()
     db.disconnect()
     if len(data) == 0:
-        print(True)
+        return True
+    if (date - data[0][0]).days >= 365 or (date - data[0][0]).days == 0:
         return True
     return False
 
+
+def check_add_memo(memo_number: int, memo_date: str) -> bool:
+    """
+    Check if the memo already exists.
+    """
+    # Open a new connection
+    db = db_connector.connect()
+    cursor = db.cursor()
+    date = datetime.datetime.strptime(memo_date, "%d/%m/%Y")
+
+    query = "select register_date from memo_entry where memo_number = '{}' order by 1 DESC".format(
+             memo_number)
+    cursor.execute(query)
+    data = cursor.fetchall()
+    db.disconnect()
+    if len(data) == 0:
+        return True
+    if (date - data[0][0]).days >= 365:
+        return True
+    return False
 
 def get_id_by_memo_number(memo_number, supplier_id, party_id) -> int:
     """
     Get the memo_id using memo_number, supplier_id and party_id
     """
+    # Open a new connection
     db = db_connector.connect()
     cursor = db.cursor()
 
-    query = "select id from memo_entry where memo_number = {} AND supplier_id = {} AND party_id = {};".format(
-        memo_number, supplier_id, party_id)
+    query = "select id from memo_entry where memo_number = {} AND supplier_id = {} AND party_id = {} " \
+            "order by register_date DESC;".format(
+             memo_number, supplier_id, party_id)
 
-    print(query)
     cursor.execute(query)
     data = cursor.fetchall()
     db.disconnect()
-    print(data)
     return int(data[0][0])

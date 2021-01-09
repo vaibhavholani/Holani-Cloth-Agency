@@ -5,7 +5,7 @@ This class is used to select a supplier's register.
 """
 from __future__ import annotations
 from Add_Menu_Entity import register_entry, new_entry, party_selector
-from Database import Lists
+from Database import Lists, retrieve_indivijual
 from typing import List
 import tkinter
 from tkinter import *
@@ -22,15 +22,19 @@ class Selector:
 
     """
 
-    master = Lists.supplier_names
-
     def __init__(self, option: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Choose Supplier")
+        self.window.geometry("1500x1500")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
         self.bottom_frame = Frame(self.window)
+
+        self.master = retrieve_indivijual.get_all_supplier_names()
+
         # Creating an alias of the master copy of supplier names
         self.suppliers = self.master
 
@@ -75,6 +79,8 @@ class Selector:
                                command=lambda: self.on_select(
                                    listbox.get(listbox.curselection())))
 
+        select_button.bind("<Return>", func=lambda event: self.on_select(
+                                   listbox.get(listbox.curselection())))
         select_button.grid(column=0, row=0, ipadx=20, padx=90, ipady=10,
                            pady=10)
 

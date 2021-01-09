@@ -5,9 +5,11 @@ database.
 
 """
 from __future__ import annotations
-from Add_Menu_Entity import party_selector
-from Entities import MemoEntry, RegisterEntry
-from Database import Lists
+from Add_Menu_Entity import party_selector, ScrollableFrame
+from typing import List, Tuple
+from Entities import MemoEntry
+from Database import retrieve_register_entry, retrieve_indivijual, retrieve_partial_payment, retrieve_memo_entry
+from Database import update_partial_amount
 import datetime
 import tkinter
 from tkinter import messagebox
@@ -24,14 +26,25 @@ class AddMemoEntry:
     options: list containing all the options
 
     """
+
+    # Setting Date and time
     today = datetime.date.today()
     date = str(today.day) + "/" + str(today.month) + "/" + str(today.year)
+
+    # Setting Constant Options
     radio_options = {"Full": "1", "Partial": "2", "Goods Return": "3"}
     partial_options = {"In-Bill": "1", "No-bill": "2"}
 
-    def __init__(self, supplier: str, party: str) -> None:
+    def __init__(self, supplier: str, party: str, memo_number: int = 0, memo_date: str = "") -> None:
+        """
+        Creating T-kinter window
+        """
+        # The main window
         self.window = tkinter.Tk()
         self.window.title("Add Memo entry")
+        self.window.geometry("1500x1500")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
 
         # Creating top frame
         self.top_frame = Frame(self.window, highlightbackground="black",
@@ -45,8 +58,8 @@ class AddMemoEntry:
         self.left_frame = Frame(self.main_frame)
 
         # Creating the main-right frame
-        self.right_frame = Frame(self.main_frame, highlightbackground="black",
-                                 highlightcolor="black", highlightthickness=1)
+        self.right_frame = Frame(self.main_frame)
+        self.scrollable_body = ScrollableFrame.Scrollable(self.right_frame)
 
         # Creating bottom_frame
         self.bottom_frame = Frame(self.window)
@@ -57,44 +70,69 @@ class AddMemoEntry:
 
         # Creating an extra frame for radio buttons (partial mode)
         self.partial_frame = Frame(self.main_frame, highlightbackground="black",
-                                 highlightcolor="black", highlightthickness=1)
+                                   highlightcolor="black", highlightthickness=1)
 
         # Creating a frame to use partial amount
-
         self.use_partial_frame = Frame(self.main_frame, highlightbackground="blue",
-                                   highlightcolor="blue", highlightthickness=1)
-
+                                       highlightcolor="blue", highlightthickness=1)
 
         # Setting Supplier, Party and Total Amount
         self.total = 0
         self.supplier_name = supplier
         self.party_name = party
 
-        # Setting Dynamic Entry
+        # Setting Supplier and Party ID
+        self.supplier_id = int(retrieve_indivijual.get_supplier_id_by_name(self.supplier_name))
+        self.party_id = int(retrieve_indivijual.get_party_id_by_name(self.party_name))
+
+        # Setting Dynamic Entry for Memo Entry amount
         self.memo_entry_amount_entry = Entry(self.left_frame, width=50)
         self.memo_entry_amount_entry.insert(0, str(self.total))
 
-        # Creating pending bill list
-        self.pending_bill = Lists.retrieve_data(self.supplier_name,
-                                                self.party_name)
+        # Extend Memo Options
+        self.memo_number_entry = Entry(self.left_frame, width=50)
+        # Creating memo_number entry
+        self.memo_number_entry.grid(column=2, row=3, columnspan= 2)
+        self.memo_number_entry.insert(0, str(memo_number))
+
+        self.date_entry = Entry(self.left_frame, width=50)
+        self.date_entry.insert(0, str(self.date))
+        self.date_entry.grid(column=2, row=6, columnspan= 2)
 
         # Creating Selected bills list
         self.selected_bills = []
 
-        # Selected Mode Tracker
+        # Selected Mode Tracker ( Full or Partial or GR)
         self.selected_mode = 1
 
-        # Partial Mode Tracker
+        # Partial Mode Tracker (Partial-in-bill or Partial-no-bill)
         self.selected_partial = 1
 
-        # Partial Amount
-        self.partial_amount = Lists.retrieve_partial_data(self.supplier_name,
-                                                          self.party_name)[0]
-        # Use Partial?
+        # No-Bill-Partial Amount between the supplier and the party
+        self.partial_amount = retrieve_partial_payment.get_partial_payment(self.supplier_id, self.party_id)
+
+        # Use No-Bill partial tracker
         self.use_partial = 0
 
-    def create_main_frame(self) -> None:
+        # Creating pending bill list
+        pending_bill_numbers = retrieve_register_entry.get_pending_bill_numbers(self.supplier_id, self.party_id)
+        self.pending_bills = retrieve_register_entry.get_register_entry_bill_numbers\
+            (self.supplier_id, self.party_id, pending_bill_numbers)
 
+        # Getting a List of all bank names
+        self.bank_names = retrieve_indivijual.get_all_bank_names()
+        self.bank_tracker = StringVar(self.main_frame)
+        self.bank_tracker.set(self.bank_names[self.bank_names.index("None")])
+        self.payment_info = []
+
+    def create_main_frame(self) -> None:
+        """
+        Creates the main Frame!
+        Contains -
+        TOP FRAME (Party Name, Supplier Name)
+        MAIN FRAME (Radio buttons for modes, Pending Bill List, Entry's)
+        BOTTOM FRAME (back button, create button)
+        """
         # '''TOP FRAME '''
         # Creating supplier name label
         supplier_name_label1 = Label(self.top_frame, text="Supplier Name:")
@@ -126,16 +164,13 @@ class AddMemoEntry:
         memo_number_label = Label(self.left_frame, text="Memo Number: ")
         memo_number_label.grid(column=1, row=3)
 
-        # Creating memo_number entry
-        memo_number_entry = Entry(self.left_frame, width=50)
-        memo_number_entry.grid(column=2, row=3)
 
         # Creating memo_entry amount label
         memo_entry_amount_label = Label(self.left_frame, text="Amount: ")
         memo_entry_amount_label.grid(column=1, row=4)
 
         # Creating memo_entry amount entry
-        self.memo_entry_amount_entry.grid(column=2, row=4)
+        self.memo_entry_amount_entry.grid(column=2, row=4, columnspan= 2)
 
         # Creating Part Label
         self.use_partial_amount()
@@ -144,26 +179,72 @@ class AddMemoEntry:
         date_label = Label(self.left_frame, text="Date: ")
         date_label.grid(column=1, row=6)
 
-        # Creating date entry
-        date_entry = Entry(self.left_frame, width=50)
-        date_entry.insert(0, self.date)
-        date_entry.grid(column=2, row=6)
+        # Creating bank_selection drop down label and list
+        bank_label = Label(self.left_frame, text="Bank Name: ")
+        bank_label.grid(column=1, row=7)
+        bank_drop_down = OptionMenu(self.left_frame, self.bank_tracker, *self.bank_names)
+        bank_drop_down.grid(column=2, row=7, columnspan= 2)
 
-        # Creating date label
-        total_label = Label(self.right_frame, text="Total Outstanding: INR{}".format(str(self.total_outstanding())))
-        total_label.pack(side=TOP)
+        # Creating payment cheque_number
+        cheque_label = Label(self.left_frame, text="Cheque Number: ")
+        cheque_label.grid(column=1, row=8)
+        cheque_entry = Entry(self.left_frame, width=50)
+        cheque_entry.grid(column=2, row=8, columnspan= 2)
+
+        # Listbox scrollbar
+        scrollbar = Scrollbar(self.left_frame)
+        # scrollbar.grid(column=3, row=9)
+
+        # Creating Listbox
+        listbox = Listbox(self.left_frame, name="listbox", selectmode=SINGLE, yscrollcommand=scrollbar.set, width=50,
+                          height=3)
+        listbox.insert(END, *self.payment_info)
+        listbox.grid(column=2, row = 9, columnspan=2)
+
+        # Creating add and delete button
+        add_button = Button(self.left_frame, text = "Add", command= lambda:self.add_button(self.bank_tracker.get(),
+                                                                                           cheque_entry.get()))
+        add_button.grid(column = 2, row = 10)
+
+        delete_button = Button(self.left_frame, text="Delete", command= lambda: self.delete_button(listbox.get(listbox.curselection())))
+        delete_button.grid(column=3, row=10)
+
+        # Creating Deduction Detail
+        add_label = Label(self.left_frame, text="Deduction Detail Percent: ")
+        add_label.grid(column=1, row=11)
+        add_entry = Entry(self.left_frame, width=50)
+        add_entry.insert(0, str(0))
+        add_entry.grid(column=2, row=11)
+
+        # Creating Deduction Detail
+        deduct_label = Label(self.left_frame, text="Deduction Detail Amount: ")
+        deduct_label.grid(column=1, row=12)
+        deduct_entry = Entry(self.left_frame, width=50)
+        deduct_entry.insert(0, str(0))
+        deduct_entry.grid(column=2, row=12)
+
+        deduct_info_label = Label(self.left_frame, text = "Note: Deduction detail should only be applied to one bill at the time")
+
 
         self.partial_mode_radiobutton()
         self.create_check_frame()
 
         # '''BOTTOM FRAME '''
 
+        # Creating extend memo button
+
+        extend_button = Button(self.bottom_frame, text="Extend Memo", command=lambda: self.extend_memo(
+                                   self.memo_number_entry.get(),
+                                   self.memo_entry_amount_entry.get(),
+                                   self.date_entry.get(),
+                                   deduct_entry.get(), add_entry.get() ))
+
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
                                command=lambda: self.create_button(
-                                   memo_number_entry.get(),
+                                   self.memo_number_entry.get(),
                                    self.memo_entry_amount_entry.get(),
-                                   date_entry.get()))
+                                   self.date_entry.get(), deduct_entry.get(), add_entry.get()))
         create_button.grid(column=0, row=0, ipadx=20)
 
         # Creating back button
@@ -188,137 +269,273 @@ class AddMemoEntry:
         self.bottom_frame.grid(column=0, row=2)
 
     def create_check_frame(self):
+        """
+        Creating the frame that add all the pending bills into checkbox format which can be selected.
+        """
 
-        self.right_frame = Frame(self.main_frame, highlightbackground="black",
-                                 highlightcolor="black", highlightthickness=1)
+        self.right_frame = Frame(self.main_frame)
+        self.scrollable_body = ScrollableFrame.Scrollable(self.right_frame)
 
         # Creating Bill Number Label
-        bill_number = Label(self.right_frame, text="Pending Bill-Numbers: ")
+        bill_number = Label(self.scrollable_body, text="Pending Bill-Numbers: ")
         bill_number.pack(side=TOP)
 
-        for pick in self.pending_bill:
+        # Loop to set the text of the check buttons as red, green, blue, purple
+        for pick in self.pending_bills:
             text = "#" + str(pick.bill_number) + ", Amount: INR " + str(
-                pick.amount - (pick.part_payment + pick.gr_amount))
+                pick.amount - (pick.part_payment))
             if pick.status == "N":
                 self.checkbutton(text, "red")
             elif pick.status == "P":
                 text = text + "  |  Part Paid: INR {}".format(pick.part_payment)
                 self.checkbutton(text, "blue")
-            elif pick.status == "PG":
-                text = text + "  |  Part Paid: INR {} | GR Amount: INR {}".\
-                    format(pick.part_payment, pick.gr_amount)
-                self.checkbutton(text, "purple")
-            elif pick.status == "G":
-                text = text + "  |  GR Amount: INR {}".\
-                    format(pick.gr_amount)
-                self.checkbutton(text, "green")
+
+        self.scrollable_body.update()
 
         self.right_frame.grid(column=1, row=0, rowspan=3, sticky=NSEW)
 
+    def checkbutton(self, text: str, background: str):
+        """
+        Creates Check buttons for all the pending bills in the pending bill checkbox frame.
+        """
+        # Creating a variable to track the status of each checkbox
+        var = IntVar()
+        chk = Checkbutton(self.scrollable_body, text=text, variable=var,
+                          fg=background)
+        var.trace("w", lambda *args, v=var: self.callback(var, chk))
+        chk.pack(side=TOP)
+
     def show_main_window(self) -> None:
+        """
+        Executes and runs the main window.
+        """
         self.create_main_frame()
         self.window.mainloop()
 
     def radio_button_maker(self):
+        """
+        Creates radio buttons to choose between full, partial, GR
+        """
+        # the variable that tracks the selected mode for full, partial, GR
         radio_tracker = IntVar()
 
         for (text, value) in self.radio_options.items():
             Radiobutton(self.radio_frame, text=text, variable=radio_tracker,
                         value=value, command=lambda: self.mode_selection(radio_tracker)).pack(side=LEFT, ipady=5, padx=30)
 
-    def checkbutton(self, text: str, background: str):
-
-        var = IntVar()
-        chk = Checkbutton(self.right_frame, text=text, variable=var,
-                          fg=background)
-        var.trace("w", lambda *args, v=var: self.callback(var, chk))
-        chk.pack(side=TOP)
-
     # Implement the usage of Partial Payments
     def use_partial_amount(self):
+        """
+        Creates the USE partial amount b/w party and supplier frame elements
+            - current partial amount
+            - checkbox to check if it is being used
+
+        """
         # Creating Partial amount Label
         partial_label = Label(self.use_partial_frame, text="Partial Amount: {}".format(
             self.partial_amount))
 
+        # tracks the status of use check_box for partial amount b/w supplier and party.
         use_tracker = IntVar()
         use_checkbox = Checkbutton(self.use_partial_frame, text= "Use Partial amount?", variable=use_tracker,
                                    fg="blue")
 
         use_tracker.trace("w", lambda *args, v=use_tracker: self.use_partial_listener(use_tracker))
 
+        # placement of elements in the frame
         partial_label.grid(column=1, row=5)
         use_checkbox.grid(column=1, row=6)
 
-    def create_button(self, memo_number: str, amount: str, date: str) -> None:
+    def add_button(self, bank_name: str, cheque_number: str) -> None:
+        """
+        Add a payment info into the list box
+        """
+        error = False
+
+        if self.selected_mode != 3 and self.use_partial != 1:
+            try:
+                int(cheque_number)
+            except ValueError:
+                error = True
+                success_message = False
+                messagebox.showwarning(title="Error", message="Invalid Cheque Number entered")
+
+        if not error:
+            self.payment_info.append((bank_name, cheque_number))
+            self.update_payment_list()
+
+    def delete_button(self, selected_entry):
+        """
+        Delete a payement info from the list box
+        """
+        self.payment_info.remove(selected_entry)
+        self.update_payment_list()
+
+
+    def update_payment_list(self):
+        """
+        Refresh the selected options
+
+        """
+        listbox2 = self.left_frame.nametowidget("listbox")
+        listbox2.delete(0, END)
+        listbox2.insert(END, *self.payment_info)
+
+    def create_button(self, memo_number: str, amount: str, date: str, d_amount: str = 0, d_percent: str = 0) -> None:
+        """
+        Creates the memo entry in all the modes there are i.e full, partial, GR
+        """
+        error = False
+        success_message = True
+        try:
+            int(amount)
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Invalid amount entered")
 
         try:
+            int(memo_number)
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Invalid Memo Number entered")
+
+        try:
+            validate(date)
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Entered Date Should be in - DD-MM-YYYY format")
+
+        # Check the deduction detail
+        try:
+            int(d_amount)
+            int(d_percent)
+            if int(d_percent) > 100:
+                raise ValueError
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Deduction Percent and Amount must be a number and "
+                                                          "deduction percent must be less than 100.")
+
+        try:
+            if int(d_amount) != 0 and int(d_percent) != 0:
+                raise ValueError
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Both deduction detail and percentage cant be used at the "
+                                                          "same time, please only use one.")
+
+        try:
+            if (int(d_amount) != 0 or int(d_percent) != 0) and len(self.selected_bills) > 1:
+                raise ValueError
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Deduction Detail can only be provided for only one bill "
+                                                          "at a time. Please only select one bill.")
+
+        # Checking if no mode is selected
+        if self.selected_mode not in [1, 2, 3]:
+            messagebox.showwarning(title="Error", message="Please Select a Payment Option.")
+            error = True
+            success_message = False
+
+        # Check if a bank is selected
+        if (self.selected_mode == 1 and len(self.payment_info) == 0 and self.use_partial == 0) or \
+                (self.selected_mode == 2  and self.use_partial == 0
+                 and len(self.payment_info) == 0):
+            messagebox.showwarning(title="Error", message="A bank must be selected")
+            error = True
+            success_message = False
+
+        if not retrieve_memo_entry.check_new_memo(int(memo_number), date):
+            messagebox.showwarning(title="Error", message="Duplicate Memo Number Before 1 year.")
+            error = True
+            success_message = False
+
+        # if there is a error then execution
+        if not error:
             int_amount = int(amount)
             int_memo_number = int(memo_number)
-
+            d_amount = int(d_amount)
+            d_percent = int(d_percent)
+            """Separate execution of different modes"""
             if self.selected_mode == 1:
-                self.memo_full(int_memo_number, int_amount, date)
-                messagebox.showinfo(title="Complete", message="Memo Added!")
-                self.window.destroy()
-                execute(self.supplier_name, self.party_name)
+                # Full Mode
+                self.memo_full(int_memo_number, int_amount, date, self.payment_info, d_amount, d_percent)
             elif self.selected_mode == 2:
+                # Partial Mode
                 if self.selected_partial == 1:
-                    self.memo_partial_bill(int_memo_number, int_amount, date)
+                    # Partial In-bill Mode
+                    self.memo_partial_bill(int_memo_number, int_amount, date, self.payment_info, d_amount, d_percent)
                 else:
-                    self.memo_partial_random(int_memo_number, int_amount, date)
-                messagebox.showinfo(title="Complete", message="Memo Added!")
-                self.window.destroy()
-                execute(self.supplier_name, self.party_name)
+                    # Partial No-bill Mode
+                    self.memo_partial_random(int_memo_number, int_amount, date, self.payment_info)
             elif self.selected_mode == 3:
-                self.memo_goods_return(int_memo_number, int_amount, date)
-                messagebox.showinfo(title="Complete", message="Memo Added!")
-                self.window.destroy()
-                execute(self.supplier_name, self.party_name)
-            else:
-                messagebox.showwarning(title="Error",
-                                       message=
-                                       "Please Select a Payment Option.")
+                # Goods Return Mode
+                self.memo_goods_return(int_memo_number, int_amount, date, self.payment_info)
 
-        except ValueError:
-            messagebox.showwarning(title="Error",
-                                   message=
-                                   "Invalid Amount or Memo Number Entered")
+        """Displaying success message if memo created"""
+        if success_message:
+            # Showing Completion Message
+            messagebox.showinfo(title="Complete", message="Memo Added!")
 
-    def memo_full(self, memo_number: int, amount: int, date: str):
+            # Updating UI elements
+            self.refresh_window()
 
+    def memo_full(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple], d_amount: int, d_percent: int):
+        """
+        Creating memos on Full Payment Mode
+        """
+        # Checking if enough amount is paid
         if amount < self.total:
             messagebox.showwarning(title="Error",
                                    message=
                                    "The minimum amount paid must be INR{}".format(self.total))
         else:
+            # Check if the partial_amount between supplier and party is being used
+            use_amount = amount
+            if d_amount != 0:
+                use_amount = amount - d_amount
+            elif d_percent != 0:
+                use_amount = amount - ((d_percent/100)*amount)
             if self.use_partial == 1:
-                Lists.use_partial_amount(self.supplier_name, self.party_name,
-                                         amount)
+                update_partial_amount.use_partial_amount(self.supplier_id, self.party_id, use_amount)
 
             MemoEntry.call_full(memo_number, self.supplier_name,
                                 self.party_name,
-                                amount, date, self.selected_bills)
+                                amount, date, payment_info, self.selected_bills, d_amount, d_percent)
 
-    def memo_partial_bill(self, memo_number: int, amount: int, date: str):
-
+    def memo_partial_bill(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple], d_amount: int, d_percent: int):
+        """
+        Creating memos on partial in-bill Payment Mode
+        """
+        # Checking if enough amount is paid
         if amount < 0:
             messagebox.showwarning(title="Error",
                                    message="Amount should be more than INR 0")
         else:
+            # Check if the partial_amount between supplier and party is being used
+            use_amount = amount
+            if d_amount != 0:
+                use_amount = amount - d_amount
+            elif d_percent != 0:
+                use_amount = amount - ((d_percent / 100) * amount)
             if self.use_partial == 1:
-                Lists.use_partial_amount(self.supplier_name, self.party_name,
-                                         amount)
+                update_partial_amount.use_partial_amount(self.supplier_id, self.party_id, use_amount)
+
             MemoEntry.call_partial_bill(memo_number, self.supplier_name,
                                         self.party_name,
-                                        amount, date, self.selected_bills)
-        '''
-        elif amount > self.selected_bills[0].amount:
-            messagebox.showwarning(title="Error",
-                                   message="Amount should be LESS than Selected"
-                                           "Bill total: INR{}".
-                                   format(self.selected_bills[0].amount))
-        '''
+                                        amount, date, payment_info, self.selected_bills, d_amount, d_percent)
 
-    def memo_partial_random(self, memo_number: int, amount: int, date: str):
+    def memo_partial_random(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple]):
+        """
+        Creating memos on partial no-bill Payment Mode
+        """
 
         if amount < 0:
             messagebox.showwarning(title="Error",
@@ -326,9 +543,12 @@ class AddMemoEntry:
         else:
             MemoEntry.call_partial_random(memo_number, self.supplier_name,
                                           self.party_name,
-                                          amount, date, self.selected_bills)
+                                          amount, date, payment_info, self.selected_bills)
 
-    def memo_goods_return(self, memo_number: int, amount: int, date: str):
+    def memo_goods_return(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple]):
+        """
+        Creating memos goods return Mode
+        """
 
         if amount < 0:
             messagebox.showwarning(title="Error",
@@ -336,14 +556,27 @@ class AddMemoEntry:
         else:
             MemoEntry.call_gr(memo_number, self.supplier_name,
                               self.party_name,
-                              amount, date, self.selected_bills)
+                              amount, date, payment_info, self.selected_bills)
 
     def back_button(self) -> None:
+        """
+        Takes back to the previous window
+        """
         self.window.destroy()
         party_selector.execute(self.supplier_name, "Memo Entry")
 
-    def callback(self, variable: IntVar, chk: Checkbutton):
+    def extend_memo(self, memo_number: str, amount: str, date: str, bank_name: str, cheque_number: str):
+        """
+        Implements the use of extend memo option
+        """
+        self.window.destroy()
+        self.create_button(memo_number, amount, date, bank_name, cheque_number)
+        execute(self.supplier_name, self.party_name)
 
+    def callback(self, variable: IntVar, chk: Checkbutton):
+        """
+        Updating the contents of the entry amount on the basis of the selected bills
+        """
         temp_amount = (((chk.cget("text")).split("INR"))[1]).strip()
         amount = int(temp_amount.split(" ")[0])
         bill_number = int((((chk.cget("text")).split(" "))[0])[1:-1])
@@ -359,21 +592,36 @@ class AddMemoEntry:
         self.memo_entry_amount_entry.insert(0, str(self.total))
 
     def use_partial_listener(self, variable: IntVar):
-
+        """
+        Updating the current selected option for use partial no bill and in bill
+        """
         self.use_partial = variable.get()
 
     def mode_selection(self, variable: IntVar):
+        """
+        Checks the current mode selected by the user, and updated the amount option
+        """
         current_choice = variable.get()
         self.selected_mode = int(current_choice)
+
+        # Checking if the partial amount needs to be used, and showing options accordingly
         self.show_partial_options()
+
         self.total = 0
+
+        # unchecking all the selected bills
         self.selected_bills = []
+
+        # Reset entry Amount to 0 then the current total
         self.memo_entry_amount_entry.delete(0, "end")
         self.memo_entry_amount_entry.insert(0, str(self.total))
         self.right_frame.destroy()
         self.create_check_frame()
 
     def partial_mode_radiobutton(self):
+        """
+        Creates radio button to select partial in-bill or no-bill options.
+        """
         radio_tracker = IntVar()
 
         # Creating Partial Label
@@ -384,28 +632,60 @@ class AddMemoEntry:
                         value=value, command=lambda: self.partial_mode_selection(radio_tracker)).pack(side=LEFT, ipady=5, padx=30)
 
     def partial_mode_selection(self, radio_tracker: IntVar):
+        """
+        Keeps track of which partial mode is selected : partial in-bill or no-bill
+        """
         current_choice = radio_tracker.get()
         self.selected_partial = current_choice
 
     def show_partial_options(self):
-
+        """
+        Checks if the partial mode is selected, and if it is shows the partial in-bill and no-bill options.
+        """
         if self.selected_mode == 2:
             self.partial_frame.grid(column=0, row=1, pady=5)
         else:
             self.partial_frame.grid_forget()
 
     def total_outstanding(self) -> int:
+        """
+        Gives the total amount that the party needs to pay the supplier
+        """
         total = 0
-        for bill in self.pending_bill:
-            if bill.status == "N" or bill.status == "P":
-                total += bill.amount
+        for bill in self.pending_bills:
+            if bill.status in ["N", "P"]:
+                total += (bill.amount - bill.part_payment)
         return total
 
+    def set_extend(self, memo_number, memo_date):
+        self.memo_number_entry.insert(0, str(memo_number))
+        self.date_entry.insert(0, memo_date)
 
-def execute(supplier: str, party: str) -> None:
-    new_window = AddMemoEntry(supplier, party)
+    def refresh_window(self) -> None:
+        """
+        Refreshes the window to show updated results
+        """
+        memo_number = self.memo_number_entry.get()
+        memo_date = self.date_entry.get()
+        self.window.destroy()
+        execute(self.supplier_name, self.party_name, memo_number, memo_date)
+
+
+def validate(date_text: str):
+    """
+    Used to validate date format
+    """
+    try:
+        datetime.datetime.strptime(date_text, '%d/%m/%Y')
+    except ValueError:
+        raise ValueError("Incorrect data format, should be DD/MM/YYYY")
+
+
+def execute(supplier: str, party: str, memo_number: int = 0, memo_date: str = "" ) -> MemoEntry:
+    new_window = AddMemoEntry(supplier, party, memo_number, memo_date)
     new_window.show_main_window()
-
+    # new_window.set_extend(memo_number, memo_date)
+    return new_window
 
 
 

@@ -26,6 +26,9 @@ class AddBank:
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
+        self.window.geometry("700x700")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
         self.window.title("Add Bank")
         # Creating the main frame
         self.main_frame = Frame(self.window)
@@ -54,6 +57,9 @@ class AddBank:
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
                                command=lambda: self.create
+                               (bank_name_entry.get(),
+                                bank_address_entry.get()))
+        create_button.bind("<Return>", lambda event: self.create
                                (bank_name_entry.get(),
                                 bank_address_entry.get()))
 
@@ -86,6 +92,7 @@ class AddBank:
             insert_individual.insert_bank(bank)
             messagebox.showinfo(title="Complete", message="Bank Added!")
             self.back()
+
 
 def execute():
     new_window = AddBank()

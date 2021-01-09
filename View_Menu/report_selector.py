@@ -1,19 +1,21 @@
 """
 ==== Description ====
-This class is used to add Suppliers, Parties, Transporters and register_entrys to the
-database.
+This class is used to select the report that needs to be seen,
 
 """
 from __future__ import annotations
-from Main import MainMenu
+from typing import List
+from View_Menu import multiple_party_selector
+from Database import retrieve_indivijual
+from Reports import khata_report, supplier_register_report, payment_list_report, payment_list_summary, grand_total_report
 from Add_Menu_Indi import add_bank, add_party, add_supplier, add_transporter
 import tkinter
 from tkinter import *
 
 
-class AddWindow:
+class ReportSelector:
     """
-    A class that represents the add Window
+    A class that represents the report selector window.
 
     ===Attributes===
 
@@ -22,14 +24,12 @@ class AddWindow:
 
     """
 
-    options = ["Supplier", "Party", "Transporter", "Bank"]
+    options = ["Khata Report", "Supplier Register", "Payment List", "Payment List Summary", "Grand Total List"]
 
-    def __init__(self) -> None:
+    def __init__(self, start_date: str, end_date: str, supplier_names: List[str], party_names: List[str]) -> None:
+
         self.window = tkinter.Tk()
-        self.window.geometry("700x700")
-        self.window.rowconfigure(0, weight=1)
-        self.window.grid_columnconfigure(0, weight=1)
-        self.window.title("Add Menu")
+        self.window.title("Report Menu")
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -37,6 +37,11 @@ class AddWindow:
 
         self.string_var = StringVar(self.main_frame)
         self.string_var.set(self.options[0])
+
+        self.start_date = start_date
+        self.end_date = end_date
+        self.supplier_names = supplier_names
+        self.party_names = party_names
         self.show_main_window()
 
     def create_main_frame(self) -> None:
@@ -53,7 +58,6 @@ class AddWindow:
         select_button = Button(self.main_frame, text="Select",
                                command=lambda: self.on_select
                                (self.string_var.get()))
-        select_button.bind("<Return>", lambda event: self.on_select(self.string_var.get()))
 
         select_button.grid(column=3, row=1)
 
@@ -66,26 +70,33 @@ class AddWindow:
         self.bottom_frame.grid(column=0, row=1)
 
     def on_select(self, select: str):
-        self.window.destroy()
+
+        supplier_ids = retrieve_indivijual.get_supplier_ids_by_list(self.supplier_names)
+        party_ids = retrieve_indivijual.get_party_ids_by_list(self.party_names)
+
         if select == self.options[0]:
-            add_supplier.execute()
+            khata_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
         elif select == self.options[1]:
-            add_party.execute()
+            supplier_register_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
         elif select == self.options[2]:
-            add_transporter.execute()
+            payment_list_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
+        elif select == self.options[3]:
+            payment_list_summary.execute(party_ids, supplier_ids, self.start_date, self.end_date)
         else:
-            add_bank.execute()
+            grand_total_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
+
+        self.window.destroy()
 
     def back(self):
         self.window.destroy()
-        MainMenu.execute()
+        multiple_party_selector.execute(self.start_date, self.end_date, self.supplier_names)
 
     def show_main_window(self) -> None:
         self.create_main_frame()
         self.window.mainloop()
 
 
-def execute():
-    new_window = AddWindow()
+def execute(start_date: str, end_date: str, supplier_names: List[str], party_names: List[str]):
+    new_window = ReportSelector(start_date, end_date, supplier_names, party_names)
     new_window.show_main_window()
 

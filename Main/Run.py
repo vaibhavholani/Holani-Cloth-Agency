@@ -18,5 +18,6 @@ RegisterEntry.call(136, 444, "saitax", "samunder", "28/02/2019")
 RegisterEntry.call(137, 444, "saitax", "samunder", "28/02/2019")
 RegisterEntry.call(138, 444, "saitax", "samunder", "28/02/2019")
 RegisterEntry.call(139, 444, "saitax", "samunder", "28/02/2019")
+RegisterEntry.call(140, 444, "saitax", "samunder", "28/02/2019")
 
 MainMenu.execute()

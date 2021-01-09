@@ -26,6 +26,9 @@ class AddTransporter:
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
+        self.window.geometry("700x700")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
         self.window.title("Add transporter")
         # Creating the main frame
         self.main_frame = Frame(self.window)

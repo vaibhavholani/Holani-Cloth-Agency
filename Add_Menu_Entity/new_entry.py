@@ -6,7 +6,7 @@ database.
 """
 
 from __future__ import annotations
-from Add_Menu_Entity import supplier_selector, memo_entry
+from Add_Menu_Entity import supplier_selector
 from Main import MainMenu
 from typing import List
 import tkinter
@@ -24,15 +24,22 @@ class AddWindow:
 
     """
 
-    options = ["Register Entry", "Memo Entry"]
+    options = ["Register Entry", "Memo Entry", "GR Entry"]
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
         self.window.title("Add Entry")
+        self.window.geometry("1500x1500")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
         self.bottom_frame = Frame(self.window)
+
+        # Creating StringVar to display Options
+        self.string_var = StringVar(self.main_frame)
+        self.string_var.set(value=self.options[0])
 
     def create_main_frame(self) -> None:
 
@@ -41,14 +48,14 @@ class AddWindow:
         category_label.grid(column=1, row=1)
 
         # Creating Spinner
-        category_spinner = Spinbox(self.main_frame, values=tuple(self.options))
+        category_spinner = OptionMenu(self.main_frame, self.string_var, *self.options)
         category_spinner.grid(column=2, row=1)
 
         # Creating Select Button
         select_button = Button(self.main_frame, text="Select",
                                command=
                                lambda:
-                               self.on_select(category_spinner.get()))
+                               self.on_select(self.string_var.get()))
         select_button.grid(column=3, row=1)
 
         # Creating back button
@@ -58,6 +65,8 @@ class AddWindow:
 
         self.main_frame.grid(column=0, row=0)
         self.bottom_frame.grid(column=0, row=1)
+
+    # def callback(self, variable: StringVar):
 
     def on_select(self, select: str):
 

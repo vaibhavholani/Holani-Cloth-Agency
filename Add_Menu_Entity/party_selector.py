@@ -5,7 +5,8 @@ This class is used to select a party for memo entry.
 """
 from __future__ import annotations
 from Add_Menu_Entity import register_entry, memo_entry_new, supplier_selector
-from Database import Lists
+from View_Menu import date_selector
+from Database import retrieve_indivijual
 import tkinter
 from tkinter import *
 
@@ -21,15 +22,19 @@ class Selector:
 
     """
 
-    master = Lists.party_names
-
     def __init__(self, supplier_name: str, option: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Choose Party")
+        self.window.geometry("1500x1500")
+        self.window.rowconfigure(0, weight=1)
+        self.window.grid_columnconfigure(0, weight=1)
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
         self.bottom_frame = Frame(self.window)
+
+        self.master = retrieve_indivijual.get_all_party_names()
+
         # Creating an alias of the master copy of supplier names
         self.suppliers = self.master
 
@@ -85,6 +90,8 @@ class Selector:
 
         select_button.grid(column=0, row=0, ipadx=20, padx=90, ipady=10,
                            pady=10)
+        select_button.bind("<Return>", func=lambda event: self.on_select(
+            listbox.get(listbox.curselection())))
 
         self.main_frame.grid(column=0, row=0)
         self.bottom_frame.grid(column=0, row=1)
@@ -102,8 +109,10 @@ class Selector:
         self.window.destroy()
         if self.option == "Register Entry":
             register_entry.execute(self.supplier_name, select)
-        else:
+        elif self.option == "Memo Entry":
             memo_entry_new.execute(self.supplier_name, select)
+        else:
+            date_selector.execute("gr_entry", self.supplier_name, select)
 
     def callback(self, sv: StringVar):
         self.update_list(sv.get())
