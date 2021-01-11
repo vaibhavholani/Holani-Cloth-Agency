@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Tuple
 from Visualise import create_pdf
 from Database import retrieve_register_entry, retrieve_indivijual
-from Visualise import show_pdf
+from Main import show_pdf
 
 
 def grand_total_report(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str) -> List:
@@ -36,26 +36,24 @@ def grand_total_report(party_ids: List[int], supplier_ids: List[int], start_date
     create_pdf.add_alt_color(table, len(table_data))
     create_pdf.add_padded_header_footer_columns(table, len(table_data))
     create_pdf.add_table_font(table, "Courier")
+    create_pdf.make_last_row_bold(table, len(table_data))
     master_elements.append(table)
     return master_elements
 
 
-def total_bottom_column(data: List) -> List[Tuple]:
+def total_bottom_column(data: List) -> Tuple:
     """
     Add up all the values
     """
     total_sum = 0
-    pending_sum = 0
-    partial_sum = 0
     gr_sum = 0
 
-    for elements in data:
-        total_sum += int(elements[2])
-        partial_sum += int(elements[3])
-        gr_sum += int(elements[4])
-        pending_sum += int(elements[5])
+    for x in range(1, len(data)):
+        elements = data[x]
+        total_sum += int(elements[1])
+        gr_sum += int(elements[2])
 
-    return [("Total", "", total_sum, partial_sum, gr_sum, pending_sum)]
+    return "Total", str(total_sum), str(gr_sum)
 
 
 def execute(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str):
@@ -64,4 +62,3 @@ def execute(party_ids: List[int], supplier_ids: List[int], start_date: str, end_
     """
     data = grand_total_report(party_ids, supplier_ids, start_date, end_date)
     show_pdf.show_pdf(data, "grand_total_report")
-

@@ -29,7 +29,7 @@ class AddTransporter:
         self.window.geometry("700x700")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
-        self.window.title("Add transporter")
+        self.window.title("Add Transporter")
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -45,6 +45,7 @@ class AddTransporter:
 
         # Creating transporter name entry
         transporter_name_entry = Entry(self.main_frame, width=100)
+        transporter_name_entry.focus()
         transporter_name_entry.grid(column=2, row=1)
 
         # Creating transporter address label
@@ -91,8 +92,6 @@ class AddTransporter:
             insert_individual.insert_transporter(transport)
             messagebox.showinfo(title="Complete", message="Transporter Added!")
             self.back()
-
-
 
 
 def execute():

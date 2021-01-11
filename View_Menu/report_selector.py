@@ -8,7 +8,8 @@ from typing import List
 from View_Menu import multiple_party_selector
 from Database import retrieve_indivijual
 from Reports import khata_report, supplier_register_report, payment_list_report, payment_list_summary, grand_total_report
-from Add_Menu_Indi import add_bank, add_party, add_supplier, add_transporter
+from Main import MainMenu
+
 import tkinter
 from tkinter import *
 
@@ -66,6 +67,11 @@ class ReportSelector:
                              command=lambda: self.back())
         back_button.pack()
 
+        # Creating back button
+        main_button = Button(self.bottom_frame, text="<<Main Menu",
+                             command=lambda: self.back_main_button())
+        main_button.pack()
+
         self.main_frame.grid(column=0, row=0)
         self.bottom_frame.grid(column=0, row=1)
 
@@ -85,11 +91,16 @@ class ReportSelector:
         else:
             grand_total_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
 
-        self.window.destroy()
-
     def back(self):
         self.window.destroy()
         multiple_party_selector.execute(self.start_date, self.end_date, self.supplier_names)
+
+    def back_main_button(self) -> None:
+        """
+        Go back to the main menu
+        """
+        self.window.destroy()
+        MainMenu.execute()
 
     def show_main_window(self) -> None:
         self.create_main_frame()

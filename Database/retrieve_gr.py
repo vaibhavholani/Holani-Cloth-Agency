@@ -62,6 +62,6 @@ def get_gr_between_dates(supplier_id: int, party_id: int, start_date: str, end_d
     cursor.execute(query)
     data = cursor.fetchall()
     db.disconnect()
-    if data[0][0] is None or len(data) == 0:
+    if data[0][0] is None or len(data) == 0 or data[0][0] == 0:
         return -1
     return data[0][0]

@@ -10,6 +10,7 @@ from typing import List, Tuple
 from Entities import MemoEntry
 from Database import retrieve_register_entry, retrieve_indivijual, retrieve_partial_payment, retrieve_memo_entry
 from Database import update_partial_amount
+from Main import MainMenu
 import datetime
 import tkinter
 from tkinter import messagebox
@@ -27,15 +28,12 @@ class AddMemoEntry:
 
     """
 
-    # Setting Date and time
-    today = datetime.date.today()
-    date = str(today.day) + "/" + str(today.month) + "/" + str(today.year)
-
     # Setting Constant Options
     radio_options = {"Full": "1", "Partial": "2", "Goods Return": "3"}
     partial_options = {"In-Bill": "1", "No-bill": "2"}
 
-    def __init__(self, supplier: str, party: str, memo_number: int = 0, memo_date: str = "") -> None:
+    def __init__(self, supplier: str, party: str, date1: str,
+                 date2: str, date3: st, memo_number: int = 0) -> None:
         """
         Creating T-kinter window
         """
@@ -85,19 +83,28 @@ class AddMemoEntry:
         self.supplier_id = int(retrieve_indivijual.get_supplier_id_by_name(self.supplier_name))
         self.party_id = int(retrieve_indivijual.get_party_id_by_name(self.party_name))
 
+        # Extend Memo Options
+        self.memo_number_entry = Entry(self.left_frame, width=50)
+        # Creating memo_number entry
+        self.memo_number_entry.grid(column=2, row=3, columnspan=5)
+        self.memo_number_entry.insert(0, str(memo_number))
+
         # Setting Dynamic Entry for Memo Entry amount
         self.memo_entry_amount_entry = Entry(self.left_frame, width=50)
         self.memo_entry_amount_entry.insert(0, str(self.total))
 
-        # Extend Memo Options
-        self.memo_number_entry = Entry(self.left_frame, width=50)
-        # Creating memo_number entry
-        self.memo_number_entry.grid(column=2, row=3, columnspan= 2)
-        self.memo_number_entry.insert(0, str(memo_number))
-
-        self.date_entry = Entry(self.left_frame, width=50)
-        self.date_entry.insert(0, str(self.date))
-        self.date_entry.grid(column=2, row=6, columnspan= 2)
+        # Date Entry
+        self.date_entry1 = Entry(self.left_frame, width=10)
+        self.date_entry1.insert(0, str(date1))
+        Label(self.left_frame, text = " / ").grid(column=3, row=6)
+        Label(self.left_frame, text=" / ").grid(column=5, row=6)
+        self.date_entry1.grid(column=2, row=6)
+        self.date_entry2 = Entry(self.left_frame, width=10)
+        self.date_entry2.insert(0, str(date2))
+        self.date_entry2.grid(column=4, row=6)
+        self.date_entry3 = Entry(self.left_frame, width=20)
+        self.date_entry3.insert(0, str(date3))
+        self.date_entry3.grid(column=6, row=6)
 
         # Creating Selected bills list
         self.selected_bills = []
@@ -170,7 +177,7 @@ class AddMemoEntry:
         memo_entry_amount_label.grid(column=1, row=4)
 
         # Creating memo_entry amount entry
-        self.memo_entry_amount_entry.grid(column=2, row=4, columnspan= 2)
+        self.memo_entry_amount_entry.grid(column=2, row=4, columnspan= 5)
 
         # Creating Part Label
         self.use_partial_amount()
@@ -183,13 +190,13 @@ class AddMemoEntry:
         bank_label = Label(self.left_frame, text="Bank Name: ")
         bank_label.grid(column=1, row=7)
         bank_drop_down = OptionMenu(self.left_frame, self.bank_tracker, *self.bank_names)
-        bank_drop_down.grid(column=2, row=7, columnspan= 2)
+        bank_drop_down.grid(column=2, row=7, columnspan= 5)
 
         # Creating payment cheque_number
         cheque_label = Label(self.left_frame, text="Cheque Number: ")
         cheque_label.grid(column=1, row=8)
         cheque_entry = Entry(self.left_frame, width=50)
-        cheque_entry.grid(column=2, row=8, columnspan= 2)
+        cheque_entry.grid(column=2, row=8, columnspan= 5)
 
         # Listbox scrollbar
         scrollbar = Scrollbar(self.left_frame)
@@ -199,7 +206,7 @@ class AddMemoEntry:
         listbox = Listbox(self.left_frame, name="listbox", selectmode=SINGLE, yscrollcommand=scrollbar.set, width=50,
                           height=3)
         listbox.insert(END, *self.payment_info)
-        listbox.grid(column=2, row = 9, columnspan=2)
+        listbox.grid(column=2, row = 9, columnspan=5)
 
         # Creating add and delete button
         add_button = Button(self.left_frame, text = "Add", command= lambda:self.add_button(self.bank_tracker.get(),
@@ -214,14 +221,14 @@ class AddMemoEntry:
         add_label.grid(column=1, row=11)
         add_entry = Entry(self.left_frame, width=50)
         add_entry.insert(0, str(0))
-        add_entry.grid(column=2, row=11)
+        add_entry.grid(column=2, row=11, columnspan=5)
 
         # Creating Deduction Detail
         deduct_label = Label(self.left_frame, text="Deduction Detail Amount: ")
         deduct_label.grid(column=1, row=12)
         deduct_entry = Entry(self.left_frame, width=50)
         deduct_entry.insert(0, str(0))
-        deduct_entry.grid(column=2, row=12)
+        deduct_entry.grid(column=2, row=12, columnspan=5)
 
         deduct_info_label = Label(self.left_frame, text = "Note: Deduction detail should only be applied to one bill at the time")
 
@@ -236,7 +243,7 @@ class AddMemoEntry:
         extend_button = Button(self.bottom_frame, text="Extend Memo", command=lambda: self.extend_memo(
                                    self.memo_number_entry.get(),
                                    self.memo_entry_amount_entry.get(),
-                                   self.date_entry.get(),
+                                   "{}/{}/{}".format(self.date_entry1.get(),self.date_entry2.get(),self.date_entry3.get()),
                                    deduct_entry.get(), add_entry.get() ))
 
         # Creating create button
@@ -244,7 +251,8 @@ class AddMemoEntry:
                                command=lambda: self.create_button(
                                    self.memo_number_entry.get(),
                                    self.memo_entry_amount_entry.get(),
-                                   self.date_entry.get(), deduct_entry.get(), add_entry.get()))
+                                   "{}/{}/{}".format(self.date_entry1.get(),self.date_entry2.get(),self.date_entry3.get()),
+                                   deduct_entry.get(), add_entry.get()))
         create_button.grid(column=0, row=0, ipadx=20)
 
         # Creating back button
@@ -252,13 +260,18 @@ class AddMemoEntry:
                              command=lambda: self.back_button())
         back_button.grid(column=2, row=0, padx=90, ipadx=20)
 
+        # Creating back button
+        main_button = Button(self.bottom_frame, text="<<Main Menu",
+                             command=lambda: self.back_main_button())
+        main_button.grid(column=3, row=0, padx=90, ipadx=20)
+
         # '''FRAME PLACEMENT '''
 
         self.top_frame.grid(column=0, row=0)
 
-        self.main_frame.grid(column=0, row=1)
-
         self.radio_frame.grid(column=0, row=0)
+
+        self.main_frame.grid(column=0, row=1)
 
         self.left_frame.grid(column=0, row=2)
 
@@ -508,7 +521,7 @@ class AddMemoEntry:
 
             MemoEntry.call_full(memo_number, self.supplier_name,
                                 self.party_name,
-                                amount, date, payment_info, self.selected_bills, d_amount, d_percent)
+                                use_amount, date, payment_info, self.selected_bills, d_amount, d_percent)
 
     def memo_partial_bill(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple], d_amount: int, d_percent: int):
         """
@@ -530,7 +543,7 @@ class AddMemoEntry:
 
             MemoEntry.call_partial_bill(memo_number, self.supplier_name,
                                         self.party_name,
-                                        amount, date, payment_info, self.selected_bills, d_amount, d_percent)
+                                        use_amount, date, payment_info, self.selected_bills, d_amount, d_percent)
 
     def memo_partial_random(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple]):
         """
@@ -564,6 +577,14 @@ class AddMemoEntry:
         """
         self.window.destroy()
         party_selector.execute(self.supplier_name, "Memo Entry")
+
+    def back_main_button(self) -> None:
+        """
+        Go back to the main menu
+        """
+        self.window.destroy()
+        MainMenu.execute()
+
 
     def extend_memo(self, memo_number: str, amount: str, date: str, bank_name: str, cheque_number: str):
         """
@@ -666,9 +687,11 @@ class AddMemoEntry:
         Refreshes the window to show updated results
         """
         memo_number = self.memo_number_entry.get()
-        memo_date = self.date_entry.get()
+        memo_date1 = self.date_entry1.get()
+        memo_date2 = self.date_entry2.get()
+        memo_date3 = self.date_entry3.get()
         self.window.destroy()
-        execute(self.supplier_name, self.party_name, memo_number, memo_date)
+        execute(self.supplier_name, self.party_name, memo_date1, memo_date2, memo_date3, memo_number)
 
 
 def validate(date_text: str):
@@ -681,8 +704,10 @@ def validate(date_text: str):
         raise ValueError("Incorrect data format, should be DD/MM/YYYY")
 
 
-def execute(supplier: str, party: str, memo_number: int = 0, memo_date: str = "" ) -> MemoEntry:
-    new_window = AddMemoEntry(supplier, party, memo_number, memo_date)
+def execute(supplier: str, party: str, date1: str = str(datetime.date.today().day),
+                 date2: str = datetime.date.today().month, date3: str = datetime.date.today().year, memo_number: int = 0 ) -> MemoEntry:
+    # Setting Date and time
+    new_window = AddMemoEntry(supplier, party, date1, date2, date3, memo_number)
     new_window.show_main_window()
     # new_window.set_extend(memo_number, memo_date)
     return new_window

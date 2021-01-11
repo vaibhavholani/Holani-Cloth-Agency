@@ -62,6 +62,7 @@ class Selector:
 
         # Creating Search Entry
         search_entry = Entry(self.main_frame, textvariable=sv, width=100)
+        search_entry.focus()
         search_entry.grid(column=2, row=1)
 
         # Creating Choose Label

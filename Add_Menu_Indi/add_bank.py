@@ -45,6 +45,7 @@ class AddBank:
         # Creating bank name entry
         bank_name_entry = Entry(self.main_frame, width=100)
         bank_name_entry.grid(column=2, row=1)
+        bank_name_entry.focus()
 
         # Creating bank address label
         bank_address_label = Label(self.main_frame, text="Bank Address: ")

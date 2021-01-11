@@ -8,6 +8,7 @@ from __future__ import annotations
 from Add_Menu_Entity import party_selector
 from Entities import Grentry
 from Database import retrieve_gr, retrieve_indivijual
+from Main import MainMenu
 import tkinter
 from tkinter import messagebox
 from tkinter import *
@@ -29,7 +30,7 @@ class AddGREntry:
 
     def __init__(self, supplier_name: str, party_name: str, start_date: str, end_date: str) -> None:
         self.window = tkinter.Tk()
-        self.window.title("Add gr_entry")
+        self.window.title("Settle GR entry")
         self.window.geometry("1500x1500")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
@@ -79,6 +80,7 @@ class AddGREntry:
 
         # Creating register_entry amount entry
         amount_entry = Entry(self.main_frame, width=100)
+        amount_entry.focus()
         amount_entry.grid(column=2, row=4)
 
         # Creating create button
@@ -94,6 +96,11 @@ class AddGREntry:
         back_button = Button(self.bottom_frame, text="<<Back",
                              command=lambda: self.back_button())
         back_button.grid(column=2, row=0, padx=90, ipadx=20)
+
+        # Creating back button
+        main_button = Button(self.bottom_frame, text="<<Main Menu",
+                             command=lambda: self.back_main_button())
+        main_button.grid(column=3, row=0, padx=90, ipadx=20)
 
         self.main_frame.grid(column=0, row=0)
         self.bottom_frame.grid(column=0, row=1)
@@ -118,6 +125,13 @@ class AddGREntry:
     def back_button(self) -> None:
         self.window.destroy()
         party_selector.execute(self.supplier_name, "Memo Entry")
+
+    def back_main_button(self) -> None:
+        """
+        Go back to the main menu
+        """
+        self.window.destroy()
+        MainMenu.execute()
 
 
 def validate(date_text: str):

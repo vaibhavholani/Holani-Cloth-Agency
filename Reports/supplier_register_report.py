@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import List, Tuple
-from Visualise import create_pdf, show_pdf
+from Visualise import create_pdf
+from Main import show_pdf
 from Database import retrieve_register_entry, retrieve_indivijual, retrieve_partial_payment
 
 
@@ -9,7 +10,7 @@ def supplier_register(party_ids: List[int], supplier_ids: List[int], start_date:
     Returns a 2D list of all pdf elements for supplier register
     """
 
-    table_header = ("Party Name", "Bill Number", "Bill Amount", "Part In-Bill", "Pending Amount", "Bill Date",  "Status")
+    table_header = ("Bill Number", "Bill Amount", "Part In-Bill", "Pending Amount", "Bill Date",  "Status")
 
     hr_line = create_pdf.create_horizontal_line()
 

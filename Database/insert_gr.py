@@ -19,13 +19,6 @@ def insert_gr(entry: MemoEntry) -> None:
     cursor.execute(sql, val)
     db.commit()
 
-    sql = "INSERT INTO gr_entry (supplier_id, party_id, register_date, amount) " \
-          "VALUES (%s, %s, %s, %s)"
-    val = (entry.supplier_id, entry.party_id, entry.date, entry.amount)
-
-    cursor.execute(sql, val)
-    db.commit()
-
     db.disconnect()
 
 

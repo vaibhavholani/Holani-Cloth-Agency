@@ -44,6 +44,7 @@ class AddParty:
 
         # Creating party name entry
         party_name_entry = Entry(self.main_frame, width=100)
+        party_name_entry.focus()
         party_name_entry.grid(column=2, row=1)
 
         party_short_label = Label(self.main_frame, text="Short name: ")

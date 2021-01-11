@@ -216,3 +216,13 @@ def change_cell_color(table: LongTable, x: int, y: int, color: str) -> None:
     ts = TableStyle(
         [('BACKGROUND', [x, y], [x, y], color)])
     table.setStyle(ts)
+
+
+def make_last_row_bold(table: LongTable, len_data: int):
+    """
+    Very simple to understand dude....
+    """
+    table_style = TableStyle([('FONTNAME', (0, len_data - 1), (-1, len_data - 1), 'Courier-Bold'),
+                              ('BACKGROUND', (0, len_data - 1), (-1, len_data - 1), colors.sandybrown)
+                              ])
+    table.setStyle(table_style)

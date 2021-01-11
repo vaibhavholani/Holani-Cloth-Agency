@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Tuple
 from Visualise import create_pdf
 from Database import retrieve_register_entry, retrieve_indivijual, retrieve_partial_payment, retrieve_gr
-from Visualise import show_pdf
+from Main import show_pdf
 
 
 def payment_list(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str) -> List:
@@ -54,6 +54,7 @@ def total_bottom_column(data: List, part_no_bill: int, gr_amount: int) -> List[T
     """
     Add up all the values
     """
+
     total_sum = 0
     partial_sum = 0
     pending_amount = 0
@@ -63,13 +64,16 @@ def total_bottom_column(data: List, part_no_bill: int, gr_amount: int) -> List[T
         if elements[2] != '-':
             partial_sum += int(elements[2])
 
+    if gr_amount == -1 or gr_amount == "-1":
+        gr_amount = 0
+
     # if pending_amount - gr_amount == 0:
     #     create_pdf.change_cell_color(table, -1, 3, "green")
     # else:
     #     create_pdf.change_cell_color(table, -1, 3, "red")
 
     return [("Total ->", total_sum, "Part In-bill ->  " + str(partial_sum), str(pending_amount)),
-            ("", "", "Part No-bill ->  " + str(part_no_bill), "GR: " + str(gr_amount), " F.Pending ->", str(pending_amount - gr_amount) )]
+            ("", "", "Part No-bill ->  " + str(part_no_bill), "GR: " + str(gr_amount), " F.Pending ->", str(pending_amount - gr_amount))]
 
 
 def execute(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str):

@@ -168,7 +168,7 @@ def get_supplier_register_data(supplier_id: int, party_id: int, start_date: str,
     start_date = str(datetime.datetime.strptime(start_date, "%d/%m/%Y"))
     end_date = str(datetime.datetime.strptime(end_date, "%d/%m/%Y"))
 
-    query = "select party.name, bill_number, amount, " \
+    query = "select bill_number, amount, " \
             "partial_amount, (amount - (partial_amount))," \
             "DATE_FORMAT(register_date, '%d/%m/%Y'), status from " \
             "register_entry JOIN party ON party.id = register_entry.party_id " \
@@ -288,4 +288,7 @@ def grand_total_gr(supplier_id: int, party_id: int, start_date: str, end_date: s
     """
     Get the GR between supplier and party
     """
-    return retrieve_gr.get_gr_between_dates(supplier_id, party_id, start_date, end_date)
+    r_val = retrieve_gr.get_gr_between_dates(supplier_id, party_id, start_date, end_date)
+    if r_val == -1:
+        return 0
+    return r_val

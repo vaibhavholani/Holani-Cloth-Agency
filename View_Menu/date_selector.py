@@ -21,7 +21,7 @@ class DateSelector:
     def __init__(self, option: str = "reports", supplier_name: str = "", party_name: str = ""):
         # The main window
         self.window = tkinter.Tk()
-        self.window.title("Add Memo entry")
+        self.window.title("Date Selector")
         # Creating top frame
         self.first_frame = Frame(self.window, highlightbackground="black",
                                  highlightcolor="black",
@@ -41,6 +41,7 @@ class DateSelector:
         start_date_label = Label(self.first_frame, text="Starting Date: ")
         start_date_label.pack(side=LEFT)
         sdate_day = Entry(self.first_frame)
+        sdate_day.focus()
         sdate_day.pack(side=LEFT)
         s_slash1 = Label(self.first_frame, text="/ ")
         s_slash1.pack(side=LEFT)

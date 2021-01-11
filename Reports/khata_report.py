@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Tuple
 from Visualise import create_pdf
 from Database import retrieve_register_entry, retrieve_indivijual, retrieve_partial_payment
-from Visualise import show_pdf
+from Main import show_pdf
 
 
 def khata_report(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str) -> List:

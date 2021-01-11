@@ -29,7 +29,7 @@ class AddSupplier:
         self.window.geometry("700x700")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
-        self.window.title("Add supplier")
+        self.window.title("Add Supplier")
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -44,6 +44,7 @@ class AddSupplier:
 
         # Creating supplier name entry
         supplier_name_entry = Entry(self.main_frame, width=100)
+        supplier_name_entry.focus()
         supplier_name_entry.grid(column=2, row=1)
 
         supplier_short_label = Label(self.main_frame, text="Short name: ")

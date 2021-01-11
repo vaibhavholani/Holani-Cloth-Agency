@@ -53,6 +53,7 @@ class Selector:
 
         # Creating Search Entry
         search_entry = Entry(self.main_frame, textvariable=sv, width=100)
+        search_entry.focus()
         search_entry.grid(column=2, row=1)
 
         # Creating Choose Label
@@ -98,7 +99,10 @@ class Selector:
 
     def on_select(self, select: str):
         self.window.destroy()
-        party_selector.execute(select, self.option)
+        if self.option == "Register Entry":
+            register_entry.execute(select)
+        else:
+            party_selector.execute(select, self.option)
 
     def callback(self, sv: StringVar):
         self.update_list(sv.get())

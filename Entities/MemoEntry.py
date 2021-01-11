@@ -100,7 +100,7 @@ class MemoEntry:
         for bills in self.selected_bills:
             bills.d_percent += self.d_percent
             bills.d_amount += self.d_amount
-            percent_amount = bills.amount - ((bills.d_amount/100)*bills.amount)
+            percent_amount = ((bills.d_amount/100)*bills.amount)
             if bills.status in ["P", "N"] and \
                     (bills.amount - bills.part_payment - self.amount - bills.d_amount - percent_amount <= 0):
                 bills.status = "F"
@@ -139,7 +139,7 @@ class MemoEntry:
         """
         Add the GR entry to the database
         """
-        if retrieve_gr.get_gr(self.supplier_id, self.party_id) == -1:
+        if retrieve_gr.get_gr(self.supplier_id, self.party_id) <= 0:
             insert_gr.insert_gr(self)
         else:
             update_gr.add_gr_amount(self.supplier_id, self.party_id, self.amount)
