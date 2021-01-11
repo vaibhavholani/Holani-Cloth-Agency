@@ -40,7 +40,7 @@ class AddMemoEntry:
         # The main window
         self.window = tkinter.Tk()
         self.window.title("Add Memo entry")
-        self.window.geometry("1500x1500")
+        self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
 
@@ -465,10 +465,47 @@ class AddMemoEntry:
             error = True
             success_message = False
 
-        if not retrieve_memo_entry.check_new_memo(int(memo_number), date):
-            messagebox.showwarning(title="Error", message="Duplicate Memo Number Before 1 year.")
+        if not retrieve_memo_entry.check_new_memo(int(memo_number), date, self.supplier_name, self.party_name):
+            messagebox.showwarning(title="Error", message="Duplicate Memo Number Before 1 month.")
             error = True
             success_message = False
+
+        # Amount Checks
+        # Full Mode
+        if self.selected_mode == 1 and int(amount) != self.total:
+            messagebox.showwarning(title="Error", message="Memo amount: {} greater than sum "
+                                                          "amount of bills {}".format(amount, str(self.total)))
+            error = True
+            success_message = False
+
+        if self.selected_mode == 2 and self.selected_partial == 1 and int(amount) > self.total:
+            messagebox.showwarning(title="Error", message="Memo amount: {} greater than max sum "
+                                                          "amount of bill partial payment {}".format(amount, str(self.total)))
+            error = True
+            success_message = False
+
+        # In partial amount cant be used in GR and part no bills
+        if (self.selected_mode == 3 or self.selected_partial == 2) and self.use_partial == 1:
+            messagebox.showwarning(title="Error", message="Partial Amount can't be used in GR or Partial No-bill Entry")
+            error = True
+            success_message = False
+
+        # Proper Use of Partial Amount
+        if self.use_partial == 1 and int(amount) > self.partial_amount and len(self.payment_info) == 0:
+            messagebox.showwarning(title="Error",
+                                    message="Total Memo Amount {} is more than total partial amount {}. "
+                                            "Must add more payment information! ".format(self.total,
+                                                                                        self.partial_amount))
+            error = True
+            success_message = False
+
+        # Restricting Partial bills entries to only one
+        if self.selected_mode == 2 and self.selected_partial == 1 and len(self.selected_bills) > 1:
+            messagebox.showwarning(title="Error",
+                                   message= "Partial Payment In-Bill can only be made into one bill at a time")
+            error = True
+            success_message = False
+
 
         # if there is a error then execution
         if not error:

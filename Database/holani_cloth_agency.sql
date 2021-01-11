@@ -41,7 +41,7 @@ CREATE TABLE register_entry (
 	status VARCHAR(2) DEFAULT 'N',
 	d_amount INT DEFAULT 0,
 	d_percent INT DEFAULT 0,
-	UNIQUE (bill_number, supplier_id, party_id),
+	UNIQUE (bill_number, supplier_id, party_id, register_date),
 	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
 	FOREIGN KEY (party_id) REFERENCES party(id),
 	FOREIGN KEY (supplier_id) REFERENCES supplier(id)

@@ -25,7 +25,7 @@ class Selector:
     def __init__(self, supplier_name: str, option: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Choose Party")
-        self.window.geometry("1500x1500")
+        self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
         # Creating the main frame

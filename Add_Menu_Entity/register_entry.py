@@ -30,7 +30,7 @@ class AddRegisterEntry:
     def __init__(self, supplier_name: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Add Register Entry")
-        self.window.geometry("1500x1500")
+        self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
         # Creating the main frame
@@ -147,9 +147,9 @@ class AddRegisterEntry:
             int_amount = int(amount)
             validate(date)
             party_id = retrieve_indivijual.get_party_id_by_name(party_name)
-            if not retrieve_register_entry.check_unique_bill_number(self.supplier_id, party_id, int_bill):
+            if not retrieve_register_entry.check_unique_bill_number(self.supplier_id, party_id, int_bill, date):
                 messagebox.showwarning(title="Error",
-                                       message="Duplicate Bill Number")
+                                       message="Duplicate Bill Number on the same date")
             else:
                 RegisterEntry.call(int_bill, int_amount, self.supplier_name, party_name, date)
                 messagebox.showinfo(title="Complete", message="Register Entry Added!")

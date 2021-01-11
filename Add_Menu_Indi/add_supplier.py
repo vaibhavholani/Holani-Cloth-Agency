@@ -26,7 +26,7 @@ class AddSupplier:
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
-        self.window.geometry("700x700")
+        self.window.geometry("700x500")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
         self.window.title("Add Supplier")
@@ -111,7 +111,11 @@ class AddSupplier:
                                    message=" Please fill the name, short name"
                                            " and Address Fields!")
         else:
-            address = add1 + ", " + add2 + ", " + add3
+            address = add1
+            if len(add2) != 0:
+                address = address + ", " + add2
+            if len(add3) != 0:
+                address = address + ", " + add3
             supplier = Supplier.create_supplier(name, short_name, address)
             # Add into database
             insert_individual.insert_supplier(supplier)

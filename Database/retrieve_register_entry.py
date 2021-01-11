@@ -13,7 +13,9 @@ def get_register_entry_id(supplier_id: int, party_id: int, bill_number: int) -> 
     db = db_connector.connect()
     cursor = db.cursor()
 
-    query = "select id from register_entry where bill_number = '{}' AND supplier_id = '{}' AND party_id = '{}'". \
+    query = "select id from register_entry where bill_number = '{}' AND supplier_id = '{}' AND party_id = '{}' " \
+            "order by " \
+            "register_date DESC". \
         format(bill_number, supplier_id, party_id)
     cursor.execute(query)
     data = cursor.fetchall()
@@ -21,20 +23,28 @@ def get_register_entry_id(supplier_id: int, party_id: int, bill_number: int) -> 
     return data[0][0]
 
 
-def check_unique_bill_number(supplier_id: int, party_id: int, bill_number: int) -> bool:
+def check_unique_bill_number(supplier_id: int, party_id: int, bill_number: int, date: str) -> bool:
     """
     Check if the bill number if unique
     """
     db = db_connector.connect()
     cursor = db.cursor()
 
-    query = "select id from register_entry where bill_number = '{}' AND supplier_id = '{}' AND party_id = '{}'". \
+    date = datetime.datetime.strptime(date, "%d/%m/%Y")
+
+    query = "select id, register_date from register_entry where " \
+            "bill_number = '{}' AND supplier_id = '{}' AND party_id = '{}'". \
         format(bill_number, supplier_id, party_id)
     cursor.execute(query)
     data = cursor.fetchall()
     db.disconnect()
+
     if len(data) == 0:
         return True
+
+    if (date - data[0][1]).days >= 2:
+        return True
+
     return False
 
 
@@ -75,27 +85,30 @@ def get_register_entry(supplier_id: int, party_id: int, bill_number: int) -> Reg
     cursor.execute(query)
     data = cursor.fetchall()
 
-    # make register entries
-    reference = data[0]
+    r_list = []
+    for entries in data:
+        # make register entries
+        reference = entries
 
-    # Setting variables
-    amount = int(reference[1])
-    date = str(reference[0])
-    part_amount = int(reference[2])
-    status = reference[3]
-    d_amount = int(reference[4])
-    d_percent = int(reference[5])
+        # Setting variables
+        amount = int(reference[1])
+        date = str(reference[0])
+        part_amount = int(reference[2])
+        status = reference[3]
+        d_amount = int(reference[4])
+        d_percent = int(reference[5])
 
-    # creating register entry
-    re_curr = RegisterEntry.RegisterEntry(bill_number, amount, supplier_name, party_name, date)
-    re_curr.part_payment = part_amount
-    re_curr.status = status
-    re_curr.d_amount = d_amount
-    re_curr.d_percent = d_percent
+        # creating register entry
+        re_curr = RegisterEntry.RegisterEntry(bill_number, amount, supplier_name, party_name, date)
+        re_curr.part_payment = part_amount
+        re_curr.status = status
+        re_curr.d_amount = d_amount
+        re_curr.d_percent = d_percent
+        r_list.append(re_curr)
 
     db.disconnect()
 
-    return re_curr
+    return r_list
 
 
 def get_register_entry_bill_numbers(supplier_id: int, party_id: int, bill_number: List[int]) -> List[RegisterEntry]:
@@ -109,7 +122,7 @@ def get_register_entry_bill_numbers(supplier_id: int, party_id: int, bill_number
 
         re_curr = get_register_entry(supplier_id, party_id, bill_num)
         # adding it to the list
-        re_by_bill.append(re_curr)
+        re_by_bill = re_by_bill + re_curr
 
     return re_by_bill
 

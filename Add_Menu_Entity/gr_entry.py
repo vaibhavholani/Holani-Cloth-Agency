@@ -31,7 +31,7 @@ class AddGREntry:
     def __init__(self, supplier_name: str, party_name: str, start_date: str, end_date: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Settle GR entry")
-        self.window.geometry("1500x1500")
+        self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
         # Creating the main frame

@@ -18,7 +18,7 @@ class MainMenu:
         self.window = tkinter.Tk()
         self.main_frame = Frame(self.window)
         self.window.title("Main Menu")
-        self.window.geometry("700x700")
+        self.window.geometry("500x500")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
 

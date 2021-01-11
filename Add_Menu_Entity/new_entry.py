@@ -29,7 +29,7 @@ class AddWindow:
     def __init__(self) -> None:
         self.window = tkinter.Tk()
         self.window.title("Add Entry")
-        self.window.geometry("1500x1500")
+        self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
         # Creating the main frame
