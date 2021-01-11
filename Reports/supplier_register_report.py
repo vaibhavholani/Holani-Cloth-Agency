@@ -34,7 +34,7 @@ def supplier_register(party_ids: List[int], supplier_ids: List[int], start_date:
             create_pdf.add_alt_color(table, len(table_data))
             create_pdf.add_padded_header_footer_columns(table, len(table_data))
             create_pdf.add_footer(table, len(table_data))
-            create_pdf.add_status_colour(table, table_data, 6)
+            create_pdf.add_status_colour(table, table_data, 5)
             create_pdf.add_table_font(table, "Courier")
             if add_table:
                 party_name = retrieve_indivijual.get_party_name_by_id(party_id)
@@ -55,9 +55,9 @@ def total_bottom_column(data: List, part_no_bill:int) -> List[Tuple]:
     partial_sum = 0
 
     for elements in data:
-        total_sum += int(elements[2])
-        partial_sum += int(elements[3])
-        pending_sum += int(elements[4])
+        total_sum += int(elements[1])
+        partial_sum += int(elements[2])
+        pending_sum += int(elements[3])
 
     return [("","Total->", total_sum, partial_sum, pending_sum),
             ("", "", "", "Part No-Bill-> " + str(part_no_bill))]
