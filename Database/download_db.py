@@ -1,4 +1,3 @@
-
 from Database import online_db_connector
 from Database import db_connector
 
@@ -22,10 +21,9 @@ def upload_individual() -> None:
     timestamp = (local_cursor.fetchall())[0][0]
 
     for individual in individual_list:
-
         # Getting new data
         query = "select id, name, address from {} where last_update > CAST('{}' AS DATETIME)".format(individual,
-                                                                                                    timestamp)
+                                                                                                     timestamp)
         local_cursor.execute(query)
         new_data = local_cursor.fetchall()
 
@@ -123,7 +121,7 @@ def upload_memo_payments() -> None:
     timestamp = (local_cursor.fetchall())[0][0]
 
     # Getting new data
-    query = "select memo_id, bank_id, cheque_number from memo_payments where last_update > CAST('{}' AS DATETIME)"\
+    query = "select memo_id, bank_id, cheque_number from memo_payments where last_update > CAST('{}' AS DATETIME)" \
         .format(timestamp)
     local_cursor.execute(query)
     new_data = local_cursor.fetchall()
