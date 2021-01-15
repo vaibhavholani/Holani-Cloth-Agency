@@ -3,7 +3,7 @@ from tkinter import *
 from Add_Menu_Entity import new_entry
 from Add_Menu_Indi import Add_Menu
 from View_Menu import date_selector
-from Database import upload_db
+from Database import upload_db, db_connector, online_db_connector, download_db
 from tkinter import messagebox
 
 
@@ -41,12 +41,16 @@ class MainMenu:
         upload_button = Button(self.main_frame, text="Update Database",
                                command=lambda: update_button(),
                                padx=10, pady=10)
+        download_buttonn = Button(self.main_frame, text="Download from Database",
+                               command=lambda: download_button(),
+                               padx=10, pady=10)
 
         add_entry_button.grid(row=0, column=0, pady=10, padx=10)
         add_entity_button.grid(row=1, column=0, pady=10, padx=10)
         view_button.grid(row=2, column=0, pady=10, padx=10)
         edit_button.grid(row=3, column=0, pady=10, padx=10)
         upload_button.grid(row=4, column=0, pady=10, padx=10)
+        download_buttonn.grid(row=5, column=0, pady=10, padx=10 )
 
         self.main_frame.grid(row=0, column=0)
         self.window.mainloop()
@@ -67,6 +71,27 @@ class MainMenu:
 def update_button():
     upload_db.update()
     messagebox.showinfo(title="Complete", message="Online Database Update Complete!")
+
+
+def download_button():
+    local_db = db_connector.connect()
+    local_cursor = local_db.cursor()
+
+    online_db = online_db_connector.connect()
+    online_cursor = online_db.cursor()
+
+    # get the last update timestamp
+    query = "select updated_at from last_update"
+    local_cursor.execute(query)
+    local_timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    online_timestamp = (online_cursor.fetchall())[0][0]
+
+    if local_timestamp >= online_timestamp:
+        messagebox.showinfo(title="Up to Date", message="Database Up-to-Date")
+    else:
+        download_db.download()
+        messagebox.showinfo(title="Update Complete", message="Please Wait")
 
 
 def execute():

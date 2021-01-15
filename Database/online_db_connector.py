@@ -13,3 +13,22 @@ def connect():
         database="iobxgumy_holani_cloth_agency")
 
     return mydb
+
+
+def update() -> None:
+    """
+    Set the new timestamp
+    """
+    # Local Database
+    online_db = connect()
+    online_cursor = online_db.cursor()
+
+    # get the last update timestamp
+    query = "select updated_at from last_update"
+    online_cursor.execute(query)
+    local_timestamp = (online_cursor.fetchall())[0][0]
+
+    # UPDATE it with the new one
+    query = "UPDATE last_update SET updated_at = CURRENT_TIMESTAMP where updated_at = " \
+            "CAST('{}' AS DATETIME);".format(local_timestamp)
+    online_cursor.execute(query)

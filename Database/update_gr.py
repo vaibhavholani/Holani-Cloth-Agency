@@ -20,3 +20,4 @@ def add_gr_amount(supplier_id: int, party_id: int, amount: int) -> None:
     cursor.execute(query)
     db.commit()
     db.disconnect()
+    db_connector.update()

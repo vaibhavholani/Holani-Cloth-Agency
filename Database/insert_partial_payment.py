@@ -19,3 +19,4 @@ def insert_partial_payment(entry: MemoEntry) -> None:
     cursor.execute(sql, val)
     db.commit()
     db.disconnect()
+    db_connector.update()

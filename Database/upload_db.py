@@ -226,36 +226,6 @@ def upload_account() -> None:
     online_db.disconnect()
 
 
-def set_new_timestamp() -> None:
-    """
-    Set the new timestamp
-    """
-    # Local Database
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
-
-    # Online Database
-    online_db = online_db_connector.connect()
-    online_cursor = online_db.cursor()
-
-    # get the last update timestamp
-    query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    local_timestamp = (local_cursor.fetchall())[0][0]
-    online_cursor.execute(query)
-    online_timestamp = (local_cursor.fetchall())[0][0]
-
-    # UPDATE it with the new one
-    query = "UPDATE last_update SET updated_at = CURRENT_TIMESTAMP where updated_at = " \
-            "CAST('{}' AS DATETIME);".format(local_timestamp)
-    local_cursor.execute(query)
-
-    # Update online database last_updated
-    query = "UPDATE last_update SET updated_at = CURRENT_TIMESTAMP where updated_at = " \
-            "CAST('{}' AS DATETIME);".format(online_timestamp)
-    online_cursor.execute(query)
-
-
 def update() -> None:
     """
     Update all and the put the new updated timestamp
@@ -267,6 +237,6 @@ def update() -> None:
     upload_memo_bills()
     upload_gr_settle()
     upload_account()
-    set_new_timestamp()
+    online_db_connector.update()
 
 

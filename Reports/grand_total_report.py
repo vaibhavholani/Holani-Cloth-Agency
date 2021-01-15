@@ -24,7 +24,7 @@ def grand_total_report(party_ids: List[int], supplier_ids: List[int], start_date
         total_work = 0
         total_gr = 0
         for supplier_id in supplier_ids:
-            grand_total_work = retrieve_register_entry.grand_total_work(party_id, supplier_id, start_date, end_date)
+            grand_total_work = retrieve_register_entry.grand_total_work(supplier_id, party_id, start_date, end_date)
             grand_total_gr = retrieve_register_entry.grand_total_gr(party_id, supplier_id, start_date, end_date)
             total_work += int(grand_total_work)
             total_gr += int(grand_total_gr)

@@ -89,22 +89,23 @@ class AddMemoEntry:
         self.memo_number_entry.grid(column=2, row=3, columnspan=5)
         self.memo_number_entry.insert(0, str(memo_number))
 
+        # Date Entry
+        self.date_entry1 = Entry(self.left_frame, width=10)
+        self.date_entry1.insert(0, str(date1))
+        Label(self.left_frame, text=" / ").grid(column=3, row=4)
+        Label(self.left_frame, text=" / ").grid(column=5, row=4)
+        self.date_entry1.grid(column=2, row=4)
+        self.date_entry2 = Entry(self.left_frame, width=10)
+        self.date_entry2.insert(0, str(date2))
+        self.date_entry2.grid(column=4, row=4)
+        self.date_entry3 = Entry(self.left_frame, width=20)
+        self.date_entry3.insert(0, str(date3))
+        self.date_entry3.grid(column=6, row=4)
+
         # Setting Dynamic Entry for Memo Entry amount
         self.memo_entry_amount_entry = Entry(self.left_frame, width=50)
         self.memo_entry_amount_entry.insert(0, str(self.total))
 
-        # Date Entry
-        self.date_entry1 = Entry(self.left_frame, width=10)
-        self.date_entry1.insert(0, str(date1))
-        Label(self.left_frame, text = " / ").grid(column=3, row=6)
-        Label(self.left_frame, text=" / ").grid(column=5, row=6)
-        self.date_entry1.grid(column=2, row=6)
-        self.date_entry2 = Entry(self.left_frame, width=10)
-        self.date_entry2.insert(0, str(date2))
-        self.date_entry2.grid(column=4, row=6)
-        self.date_entry3 = Entry(self.left_frame, width=20)
-        self.date_entry3.insert(0, str(date3))
-        self.date_entry3.grid(column=6, row=6)
 
         # Creating Selected bills list
         self.selected_bills = []
@@ -129,7 +130,7 @@ class AddMemoEntry:
         # Getting a List of all bank names
         self.bank_names = retrieve_indivijual.get_all_bank_names()
         self.bank_tracker = StringVar(self.main_frame)
-        self.bank_tracker.set(self.bank_names[self.bank_names.index("None")])
+        self.bank_tracker.set(self.bank_names[self.bank_names.index("Cash")])
         self.payment_info = []
 
     def create_main_frame(self) -> None:
@@ -171,32 +172,32 @@ class AddMemoEntry:
         memo_number_label = Label(self.left_frame, text="Memo Number: ")
         memo_number_label.grid(column=1, row=3)
 
+        # Creating date label
+        date_label = Label(self.left_frame, text="Date: ")
+        date_label.grid(column=1, row=4)
+
 
         # Creating memo_entry amount label
         memo_entry_amount_label = Label(self.left_frame, text="Amount: ")
-        memo_entry_amount_label.grid(column=1, row=4)
+        memo_entry_amount_label.grid(column=1, row=5)
 
         # Creating memo_entry amount entry
-        self.memo_entry_amount_entry.grid(column=2, row=4, columnspan= 5)
+        self.memo_entry_amount_entry.grid(column=2, row=5, columnspan= 5)
 
         # Creating Part Label
         self.use_partial_amount()
 
-        # Creating date label
-        date_label = Label(self.left_frame, text="Date: ")
-        date_label.grid(column=1, row=6)
-
         # Creating bank_selection drop down label and list
         bank_label = Label(self.left_frame, text="Bank Name: ")
-        bank_label.grid(column=1, row=7)
+        bank_label.grid(column=1, row=6)
         bank_drop_down = OptionMenu(self.left_frame, self.bank_tracker, *self.bank_names)
-        bank_drop_down.grid(column=2, row=7, columnspan= 5)
+        bank_drop_down.grid(column=2, row=6, columnspan= 5)
 
         # Creating payment cheque_number
         cheque_label = Label(self.left_frame, text="Cheque Number: ")
-        cheque_label.grid(column=1, row=8)
+        cheque_label.grid(column=1, row=7)
         cheque_entry = Entry(self.left_frame, width=50)
-        cheque_entry.grid(column=2, row=8, columnspan= 5)
+        cheque_entry.grid(column=2, row=7, columnspan= 5)
 
         # Listbox scrollbar
         scrollbar = Scrollbar(self.left_frame)

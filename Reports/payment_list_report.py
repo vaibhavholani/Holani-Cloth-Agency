@@ -25,7 +25,7 @@ def payment_list(party_ids: List[int], supplier_ids: List[int], start_date: str,
         elements.append(hr_line)
         for supplier_id in supplier_ids:
             add_table = True
-            pl_data = retrieve_register_entry.get_payment_list_data(party_id, supplier_id, start_date, end_date)
+            pl_data = retrieve_register_entry.get_payment_list_data(supplier_id, party_id,  start_date, end_date)
             if len(pl_data) == 0:
                 add_table = False
             part_no_bill = retrieve_partial_payment.get_partial_payment(supplier_id, party_id)

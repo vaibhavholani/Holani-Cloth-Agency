@@ -20,3 +20,4 @@ def update_register_entry_data(entry: RegisterEntry) -> None:
     cursor.execute(query)
     db.commit()
     db.disconnect()
+    db_connector.update()

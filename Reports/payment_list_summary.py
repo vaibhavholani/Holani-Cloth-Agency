@@ -26,7 +26,7 @@ def payment_list_summary(party_ids: List[int], supplier_ids: List[int], start_da
         table_data = [table_header]
         for supplier_id in supplier_ids:
             add_table = True
-            pl_summary_data = retrieve_register_entry.get_payment_list_summary_data(party_id, supplier_id, start_date, end_date)
+            pl_summary_data = retrieve_register_entry.get_payment_list_summary_data(supplier_id, party_id, start_date, end_date)
             if len(pl_summary_data) == 0:
                 add_table = False
             if add_table:

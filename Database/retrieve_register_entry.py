@@ -140,30 +140,34 @@ def get_khata_data_by_date(supplier_id: int, party_id: int, start_date: str, end
     start_date = str(datetime.datetime.strptime(start_date, "%d/%m/%Y"))
     end_date = str(datetime.datetime.strptime(end_date, "%d/%m/%Y"))
 
-    query = "select supplier.name, register_entry.bill_number, DATE_FORMAT(register_entry.register_date, '%d/%m/%Y'), " \
+    query = "select register_entry.bill_number, DATE_FORMAT(register_entry.register_date, '%d/%m/%Y'), " \
             "register_entry.amount, register_entry.status " \
-            "from register_entry JOIN supplier ON supplier.id = register_entry.supplier_id " \
+            "from register_entry " \
             "where party_id = '{}' AND supplier_id = '{}' AND " \
             "register_date >= '{}' AND register_date <= '{}';"\
-        .format(supplier_id, party_id, start_date, end_date)
+        .format(party_id, supplier_id, start_date, end_date)
 
     cursor.execute(query)
     bills_data = cursor.fetchall()
 
+    print(bills_data)
     for bills in bills_data:
-        query_2 = "select memo_entry.memo_number, memo_bills.amount " \
+        query_2 = "select memo_entry.memo_number, memo_bills.amount,DATE_FORMAT(memo_entry.register_date, '%d/%m/%Y')" \
                   "from memo_entry JOIN memo_bills on (memo_entry.id = memo_bills.memo_id) " \
-                  "where memo_bills.bill_number = '{}' AND memo_entry.supplier_id = '{}' AND memo_entry.party_id = '{}'"\
-            .format(bills[1], supplier_id, party_id)
+                  "where memo_bills.bill_number = '{}' AND memo_entry.supplier_id = '{}' " \
+                  "AND memo_entry.party_id = '{}'; " \
+            .format(bills[0], supplier_id, party_id)
         cursor.execute(query_2)
         memo_data = cursor.fetchall()
+
+        print(memo_data)
 
         for memos in memo_data:
             data_tuple = bills + memos
             data.append(data_tuple)
 
         if len(memo_data) == 0:
-            data_tuple = bills + ("-", "-")
+            data_tuple = bills + ("-", "-", "-")
             data.append(data_tuple)
 
     db.disconnect()
@@ -304,4 +308,89 @@ def grand_total_gr(supplier_id: int, party_id: int, start_date: str, end_date: s
     r_val = retrieve_gr.get_gr_between_dates(supplier_id, party_id, start_date, end_date)
     if r_val == -1:
         return 0
-    return r_val
+
+
+def legacy_no_memo(curr_pld: Tuple) -> List[Tuple]:
+    """
+    Returns legacy payment bill with no memos
+    """
+    if curr_pld[5] < 40:
+        bill_tuple = [("-", "-", "-", "-", "-", curr_pld[3], curr_pld[0], curr_pld[4])]
+    elif 40 <= curr_pld[5] <= 70:
+        bill_tuple = [("-", "-", "-", "-", curr_pld[3], "-", curr_pld[0], curr_pld[4])]
+    else:
+        bill_tuple = [("-", "-", "-", curr_pld[3], "-", "-", curr_pld[0], curr_pld[4])]
+
+    return bill_tuple
+
+
+def legacy_one_memo(curr_pld: Tuple, curr_memo: Tuple) -> List[Tuple]:
+    """
+    Returns legacy payment bill with one memo
+    """
+    if curr_pld[5] < 40:
+        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], "-", "-", curr_pld[3], curr_pld[0], curr_pld[4])]
+    elif 40 <= curr_pld[5] <= 70:
+        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], "-", curr_pld[3], "-", curr_pld[0], curr_pld[4])]
+    else:
+        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], curr_pld[3], "-", "-", curr_pld[0], curr_pld[4])]
+
+    return bill_tuple
+
+
+def legacy_multiple_memo(curr_memo: Tuple) -> List[Tuple]:
+    """
+    Returns legacy payment bill with multiple memos
+    """
+    bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], "-", "-", "-", "-", "-")]
+    return bill_tuple
+
+
+def legacy_payment_list(supplier_id: int, party_id: int, start_date: str, end_date: str):
+    """
+    Get the legacy payment list
+    """
+
+    # Open a new connection
+    db = db_connector.connect()
+    cursor = db.cursor()
+
+    p_l_d = get_payment_list_data(supplier_id, party_id, start_date, end_date)
+
+    bills_data = [data[0] for data in p_l_d]
+
+    memo_data = []
+    for bills in bills_data:
+        query_2 = "select memo_entry.memo_number, memo_bills.amount, memo_entry.register_date " \
+                  "from memo_entry JOIN memo_bills on (memo_entry.id = memo_bills.memo_id) " \
+                  "where memo_bills.bill_number = '{}' AND memo_entry.supplier_id = '{}' " \
+                  "AND memo_entry.party_id = '{}'; " \
+            .format(bills, supplier_id, party_id, start_date, end_date)
+        cursor.execute(query_2)
+        add_memo_data = cursor.fetchall()
+        memo_data.append(add_memo_data)
+
+    legacy_data = []
+    for entry in range(len(memo_data)):
+
+        curr_pld = p_l_d[entry]
+        curr_memo = memo_data[entry]
+        bill_tuples = []
+        if len(curr_memo) == 0:
+            bill_tuples.extend(legacy_no_memo(curr_pld))
+        elif len(curr_memo) == 1:
+            bill_tuples.extend(legacy_one_memo(curr_pld, curr_memo[0]))
+        else:
+            # Add the first entry and fill the rest with spaces
+            bill_tuples.extend(legacy_one_memo(curr_pld, curr_memo[0]))
+            # Make functions to make execution easier?
+            for memos in curr_memo[1:]:
+                bill_tuples.extend(legacy_multiple_memo(memos))
+
+        legacy_data.extend(bill_tuples)
+
+    return legacy_data
+
+
+
+

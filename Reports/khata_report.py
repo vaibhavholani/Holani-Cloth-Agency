@@ -11,8 +11,8 @@ def khata_report(party_ids: List[int], supplier_ids: List[int], start_date: str,
     Return a 2D list of all pdf elements for Khata Report
     """
 
-    table_header = ("Supplier Name", "Bill Date", "Bill Number", "Bill Amount",
-                    "Status", "Memo Number", "Memo Amount")
+    table_header = ("Bill Date", "Bill No.", "Bill Amt",
+                    "Status", "Memo No.", "Memo Amt", "Memo Date")
 
     hr_line = create_pdf.create_horizontal_line()
 
@@ -26,7 +26,7 @@ def khata_report(party_ids: List[int], supplier_ids: List[int], start_date: str,
         elements.append(hr_line)
         for supplier_id in supplier_ids:
             add_table = True
-            khata_data = retrieve_register_entry.get_khata_data_by_date(party_id, supplier_id, start_date, end_date)
+            khata_data = retrieve_register_entry.get_khata_data_by_date(supplier_id, party_id, start_date, end_date)
             if len(khata_data) == 0:
                 add_table = False
             part_no_bill = retrieve_partial_payment.get_partial_payment(supplier_id, party_id)
@@ -36,7 +36,7 @@ def khata_report(party_ids: List[int], supplier_ids: List[int], start_date: str,
             create_pdf.add_alt_color(table, len(table_data))
             create_pdf.add_padded_header_footer_columns(table, len(table_data))
             create_pdf.add_footer(table, len(table_data))
-            create_pdf.add_status_colour(table, table_data, 4)
+            create_pdf.add_status_colour(table, table_data, 3)
             create_pdf.add_table_font(table, "Courier")
             if add_table:
                 supplier_name = retrieve_indivijual.get_supplier_name_by_id(supplier_id)
@@ -57,12 +57,12 @@ def total_bottom_column(data: List, part_no_bill: int) -> List[Tuple]:
     partial_sum = 0
 
     for elements in data:
-        total_sum += int(elements[3])
-        if elements[6] != '-':
-            partial_sum += int(elements[6])
+        total_sum += int(elements[2])
+        if elements[5] != '-':
+            partial_sum += int(elements[5])
 
-    return [("", "", "Total ->", total_sum," ","Part In-bill ->", partial_sum),
-            ("", "", "", ""," ","Part No-bill ->", part_no_bill)]
+    return [("", "", "Total ->", total_sum,"Part In-bill ->", partial_sum),
+            ("", "", "", "","Part No-bill ->", part_no_bill)]
 
 
 def execute(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str):

@@ -54,17 +54,34 @@ class AddRegisterEntry:
         supplier_name_label.grid(column=2, row=0, columnspan=5)
 
         # Creating register_entry name label
-        register_entry_name_label = Label(self.main_frame, text="Bill Number:")
-        register_entry_name_label.grid(column=1, row=1)
-        register_entry_name_label.focus()
+        bill_number = Label(self.main_frame, text="Bill Number:")
+        bill_number.grid(column=1, row=1)
+        bill_number.focus()
 
         # Creating register_entry name entry
-        register_entry_name_entry = Entry(self.main_frame, width=100)
-        register_entry_name_entry.grid(column=2, row=1, columnspan=5)
+        bill_number_entry = Entry(self.main_frame, width=100)
+        bill_number_entry.grid(column=2, row=1, columnspan=5)
 
-        register_entry_short_label = Label(self.main_frame,
-                                           text="Party Short Name: ")
-        register_entry_short_label.grid(column=1, row=2)
+        # Creating date label
+        date_label = Label(self.main_frame, text="Date: ")
+        date_label.grid(column=1, row=2)
+
+        # Creating date entry
+        date_entry1 = Entry(self.main_frame, width=10)
+        date_entry1.insert(0, str(self.today.day))
+        Label(self.main_frame, text=" / ").grid(column=3, row=2)
+        Label(self.main_frame, text=" / ").grid(column=5, row=2)
+        date_entry1.grid(column=2, row=2)
+        date_entry2 = Entry(self.main_frame, width=10)
+        date_entry2.insert(0, str(self.today.month))
+        date_entry2.grid(column=4, row=2)
+        date_entry3 = Entry(self.main_frame, width=20)
+        date_entry3.insert(0, str(self.today.year))
+        date_entry3.grid(column=6, row=2)
+
+        search_label = Label(self.main_frame,
+                                           text="Party Name: ")
+        search_label.grid(column=1, row=3)
 
         # Creating register_entry name entry
         # Creating StringVar
@@ -72,7 +89,7 @@ class AddRegisterEntry:
         sv.trace("w", lambda name, index, mode, sv=sv: self.callback(sv))
 
         register_entry_search = Entry(self.main_frame, textvariable=sv, width=100)
-        register_entry_search.grid(column=2, row=2, columnspan=5)
+        register_entry_search.grid(column=2, row=3, columnspan=5)
 
         # Creating Listbox
         # Listbox scrollbar
@@ -80,44 +97,27 @@ class AddRegisterEntry:
         listbox = Listbox(self.main_frame, name="listbox", selectmode=SINGLE,
                           width=100, yscrollcommand=scrollbar.set)
         listbox.insert(END, *self.party_names)
-        listbox.grid(column=2, row=3, columnspan=5)
+        listbox.grid(column=2, row=4, columnspan=5)
 
         # Creating register_entry amount label
-        register_entry_address_label = Label(self.main_frame,
+        amount_label = Label(self.main_frame,
                                              text="Amount: ")
-        register_entry_address_label.grid(column=1, row=5)
+        amount_label.grid(column=1, row=5)
 
         # Creating register_entry amount entry
-        register_entry_address_entry = Entry(self.main_frame, width=100)
-        register_entry_address_entry.grid(column=2, row=5, columnspan=5)
-
-        # Creating date label
-        date_label = Label(self.main_frame, text="Date: ")
-        date_label.grid(column=1, row=6)
-
-        # Creating date entry
-        date_entry1 = Entry(self.main_frame, width=10)
-        date_entry1.insert(0, str(self.today.day))
-        Label(self.main_frame, text=" / ").grid(column=3, row=6)
-        Label(self.main_frame, text=" / ").grid(column=5, row=6)
-        date_entry1.grid(column=2, row=6)
-        date_entry2 = Entry(self.main_frame, width=10)
-        date_entry2.insert(0, str(self.today.month))
-        date_entry2.grid(column=4, row=6)
-        date_entry3 = Entry(self.main_frame, width=20)
-        date_entry3.insert(0, str(self.today.year))
-        date_entry3.grid(column=6, row=6)
+        amount_entry = Entry(self.main_frame, width=100)
+        amount_entry.grid(column=2, row=5, columnspan=5)
 
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
                                command=lambda: self.create_button(
-                                   register_entry_name_entry.get(),
-                                   register_entry_address_entry.get(),
+                                   bill_number_entry.get(),
+                                   amount_entry.get(),
                                    "{}/{}/{}".format(date_entry1.get(), date_entry2.get(), date_entry3.get()),
                                listbox.get(listbox.curselection())))
         create_button.bind("<Return>", lambda event: self.create_button(
-                                   register_entry_name_entry.get(),
-                                   register_entry_address_entry.get(),
+                                   bill_number_entry.get(),
+                                   amount_entry.get(),
                                    "{}/{}/{}".format(date_entry1.get(), date_entry2.get(), date_entry3.get()),
         listbox.get(listbox.curselection())))
 

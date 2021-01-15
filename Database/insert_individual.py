@@ -15,6 +15,7 @@ def insert_supplier(supplier: Supplier) -> None:
     cursor.execute(sql, val)
     db.commit()
     db.disconnect()
+    db_connector.update()
 
 
 def insert_party(party: Party) -> None:
@@ -29,6 +30,7 @@ def insert_party(party: Party) -> None:
     cursor.execute(sql, val)
     db.commit()
     db.disconnect()
+    db_connector.update()
 
 
 def insert_bank(bank: Bank) -> None:
@@ -43,6 +45,7 @@ def insert_bank(bank: Bank) -> None:
     cursor.execute(sql, val)
     db.commit()
     db.disconnect()
+    db_connector.update()
 
 
 def insert_transporter(transporter: Transporter) -> None:
@@ -57,4 +60,5 @@ def insert_transporter(transporter: Transporter) -> None:
     cursor.execute(sql, val)
     db.commit()
     db.disconnect()
+    db_connector.update()
 

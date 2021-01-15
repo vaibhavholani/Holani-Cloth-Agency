@@ -15,3 +15,20 @@ def connect():
     return mydb
 
 
+def update() -> None:
+    """
+    Set the new timestamp
+    """
+    # Local Database
+    local_db = connect()
+    local_cursor = local_db.cursor()
+
+    # get the last update timestamp
+    query = "select updated_at from last_update"
+    local_cursor.execute(query)
+    local_timestamp = (local_cursor.fetchall())[0][0]
+
+    # UPDATE it with the new one
+    query = "UPDATE last_update SET updated_at = CURRENT_TIMESTAMP where updated_at = " \
+            "CAST('{}' AS DATETIME);".format(local_timestamp)
+    local_cursor.execute(query)

@@ -39,3 +39,4 @@ def insert_register_entry(entry: RegisterEntry) -> None:
     cursor.execute(sql, val)
     db.commit()
     db.disconnect()
+    db_connector.update()

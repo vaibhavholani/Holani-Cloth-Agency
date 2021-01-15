@@ -20,6 +20,7 @@ def insert_gr(entry: MemoEntry) -> None:
     db.commit()
 
     db.disconnect()
+    db_connector.update()
 
 
 def settle_gr(entry: Grentry) -> None:
@@ -39,3 +40,4 @@ def settle_gr(entry: Grentry) -> None:
     db.commit()
 
     db.disconnect()
+    db_connector.update()

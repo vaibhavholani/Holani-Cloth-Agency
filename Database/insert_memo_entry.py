@@ -18,6 +18,7 @@ def insert_memo_entry(entry: MemoEntry) -> None:
     db.commit()
 
     db.disconnect()
+    db_connector.update()
 
 
 def insert_memo_payemts(entry: MemoEntry) -> None:
@@ -40,6 +41,7 @@ def insert_memo_payemts(entry: MemoEntry) -> None:
     db.commit()
 
     db.disconnect()
+    db_connector.update()
 
 
 def insert_memo_bills(entry: MemoBill) -> None:
@@ -58,3 +60,4 @@ def insert_memo_bills(entry: MemoBill) -> None:
     cursor.execute(sql, val)
     db.commit()
     db.disconnect()
+    db_connector.update()
