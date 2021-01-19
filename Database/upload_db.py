@@ -18,8 +18,8 @@ def upload_individual() -> None:
 
     # get the last update timestamp
     query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    timestamp = (online_cursor.fetchall())[0][0]
 
     for individual in individual_list:
 
@@ -52,8 +52,8 @@ def upload_register_entry() -> None:
 
     # get the last update timestamp
     query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
     query = "select id, supplier_id, party_id, register_date, amount, " \
@@ -88,8 +88,8 @@ def upload_memo_entry() -> None:
 
     # get the last update timestamp
     query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
     query = "select id, memo_number, supplier_id, party_id, register_date" \
@@ -119,8 +119,8 @@ def upload_memo_payments() -> None:
 
     # get the last update timestamp
     query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
     query = "select memo_id, bank_id, cheque_number from memo_payments where last_update > CAST('{}' AS DATETIME)"\
@@ -149,8 +149,8 @@ def upload_memo_bills() -> None:
 
     # get the last update timestamp
     query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
     query = "select memo_id, bill_number, type, amount from memo_bills where last_update > " \
@@ -179,8 +179,8 @@ def upload_gr_settle() -> None:
 
     # get the last update timestamp
     query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
     query = "select supplier_id, party_id, start_date, end_date, settle_amount from gr_settle where last_update > " \
@@ -209,8 +209,8 @@ def upload_account() -> None:
 
     # get the last update timestamp
     query = "select updated_at from last_update"
-    local_cursor.execute(query)
-    timestamp = (local_cursor.fetchall())[0][0]
+    online_cursor.execute(query)
+    timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
     query = "select supplier_id, party_id, partial_amount, gr_amount from supplier_party_account " \

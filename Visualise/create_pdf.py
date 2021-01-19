@@ -151,6 +151,10 @@ def add_status_colour(table: LongTable, table_data: List[Tuple], status_index: i
             bc = colors.cornflowerblue
         elif table_data[x][status_index] == "F":
             bc = colors.lightgreen
+        elif table_data[x][status_index] == "G":
+            bc = colors.darkgreen
+        elif table_data[x][status_index] == "PG":
+            bc = colors.purple
         else:
             bc = colors.burlywood
 
