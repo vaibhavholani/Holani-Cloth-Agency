@@ -101,11 +101,13 @@ class MemoEntry:
             bills.d_percent += self.d_percent
             bills.d_amount += self.d_amount
             percent_amount = ((bills.d_amount/100)*bills.amount)
-            if bills.status in ["P", "N"] and \
+            if bills.status in ["P", "N", "G", "PG"] and \
                     (bills.amount - bills.part_payment - self.amount - bills.d_amount - percent_amount <= 0):
                 bills.status = "F"
             elif bills.status == "N":
                 bills.status = "P"
+            elif bills.status == "G":
+                bills.status = "PG"
 
             bills.part_payment = bills.part_payment + self.amount
             self.inset_memo_bill_database(bills)
@@ -133,7 +135,17 @@ class MemoEntry:
         """
         Adds goods return to supplier party account.
         """
-        self.database_gr()
+        for bills in self.selected_bills:
+            if (bills.status == "P" or bills.status == "PG") and \
+                    bills.amount - self.amount:
+                bills.status = "PG"
+            elif bills.status == "N":
+                bills.status = "G"
+            bills.gr_amount = self.amount
+            bills.amount = bills.amount - self.amount
+            bills.gr_amount = bills.gr_amount + self.amount
+            self.inset_memo_bill_database(bills)
+        # self.database_gr()
 
     def database_gr(self):
         """

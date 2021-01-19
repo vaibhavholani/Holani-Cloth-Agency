@@ -91,7 +91,7 @@ def download_button():
         messagebox.showinfo(title="Up to Date", message="Database Up-to-Date")
     else:
         download_db.download()
-        messagebox.showinfo(title="Update Complete", message="Please Wait")
+        messagebox.showinfo(title="Update Complete", message="Update Complete")
 
 
 def execute():

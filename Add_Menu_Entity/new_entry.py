@@ -50,6 +50,7 @@ class AddWindow:
         # Creating Spinner
         category_spinner = OptionMenu(self.main_frame, self.string_var, *self.options)
         category_spinner.grid(column=2, row=1)
+        category_spinner.bind("<Return>", func= lambda event: self.on_select(self.string_var.get()))
 
         # Creating Select Button
         select_button = Button(self.main_frame, text="Select",

@@ -78,7 +78,7 @@ def get_register_entry(supplier_id: int, party_id: int, bill_number: int) -> Reg
     party_name = retrieve_indivijual.get_party_name_by_id(party_id)
 
     # Getting data from the database for each bill number
-    query = "select DATE_FORMAT(register_date, '%d/%m/%Y'), amount, partial_amount, status, d_amount, d_percent " \
+    query = "select DATE_FORMAT(register_date, '%d/%m/%Y'), amount, partial_amount, status, d_amount, d_percent, gr_amount " \
             "from register_entry where " \
             "bill_number = '{}' AND supplier_id = '{}' AND party_id = '{}'". \
         format(bill_number, supplier_id, party_id)
@@ -97,6 +97,7 @@ def get_register_entry(supplier_id: int, party_id: int, bill_number: int) -> Reg
         status = reference[3]
         d_amount = int(reference[4])
         d_percent = int(reference[5])
+        gr_amount = int(reference[6])
 
         # creating register entry
         re_curr = RegisterEntry.RegisterEntry(bill_number, amount, supplier_name, party_name, date)
@@ -104,6 +105,7 @@ def get_register_entry(supplier_id: int, party_id: int, bill_number: int) -> Reg
         re_curr.status = status
         re_curr.d_amount = d_amount
         re_curr.d_percent = d_percent
+        re_curr.gr_amount = gr_amount
         r_list.append(re_curr)
 
     db.disconnect()

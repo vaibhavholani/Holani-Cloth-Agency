@@ -231,7 +231,12 @@ class AddMemoEntry:
         deduct_entry.insert(0, str(0))
         deduct_entry.grid(column=2, row=12, columnspan=5)
 
-        deduct_info_label = Label(self.left_frame, text = "Note: Deduction detail should only be applied to one bill at the time")
+        # # Creating Deduction Detail
+        # gr_label = Label(self.left_frame, text="GR Amount: ")
+        # gr_label.grid(column=1, row=13)
+        # gr_entry = Entry(self.left_frame, width=50)
+        # gr_entry.insert(0, str(0))
+        # gr_entry.grid(column=2, row=13, columnspan=5)
 
 
         self.partial_mode_radiobutton()
@@ -296,13 +301,23 @@ class AddMemoEntry:
 
         # Loop to set the text of the check buttons as red, green, blue, purple
         for pick in self.pending_bills:
-            text = "#" + str(pick.bill_number) + ", Amount: INR " + str(
-                pick.amount - (pick.part_payment))
+            amount = pick.amount - (pick.part_payment) - (pick.gr_amount) - (pick.d_amount) - \
+                     (pick.amount * pick.d_percent)
+            text = "#" + str(pick.bill_number) + ", Amount: INR " + str(amount)
             if pick.status == "N":
                 self.checkbutton(text, "red")
             elif pick.status == "P":
                 text = text + "  |  Part Paid: INR {}".format(pick.part_payment)
                 self.checkbutton(text, "blue")
+            elif pick.status == "PG":
+                text = text + "  |  Part Paid: INR {} | GR Amount: INR {}". \
+                    format(pick.part_payment, pick.gr_amount)
+                self.checkbutton(text, "green")
+
+            elif pick.status == "G":
+                text = text + "  |  GR Amount: INR {}". \
+                    format(pick.gr_amount)
+                self.checkbutton(text, "purple")
 
         self.scrollable_body.update()
 
@@ -395,7 +410,7 @@ class AddMemoEntry:
         listbox2.delete(0, END)
         listbox2.insert(END, *self.payment_info)
 
-    def create_button(self, memo_number: str, amount: str, date: str, d_amount: str = 0, d_percent: str = 0) -> None:
+    def create_button(self, memo_number: str, amount: str, date: str, d_amount: str = 0, d_percent: str = 0, gr_amount: str = 0) -> None:
         """
         Creates the memo entry in all the modes there are i.e full, partial, GR
         """
@@ -452,6 +467,17 @@ class AddMemoEntry:
             messagebox.showwarning(title="Error", message="Deduction Detail can only be provided for only one bill "
                                                           "at a time. Please only select one bill.")
 
+        try:
+            if (int(d_amount) != 0 or int(d_percent) != 0) and len(self.selected_bills) > 1:
+                raise ValueError
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Deduction Detail can only be provided for only one bill "
+                                                          "at a time. Please only select one bill.")
+
+
+
         # Checking if no mode is selected
         if self.selected_mode not in [1, 2, 3]:
             messagebox.showwarning(title="Error", message="Please Select a Payment Option.")
@@ -501,12 +527,39 @@ class AddMemoEntry:
             success_message = False
 
         # Restricting Partial bills entries to only one
-        if self.selected_mode == 2 and self.selected_partial == 1 and len(self.selected_bills) > 1:
+        if (self.selected_mode == 2 and self.selected_partial == 1) and len(self.selected_bills) > 1:
             messagebox.showwarning(title="Error",
                                    message= "Partial Payment In-Bill can only be made into one bill at a time")
             error = True
             success_message = False
 
+        # Restricting GR bill entries to only one
+        if self.selected_mode == 3 and len(self.selected_bills) > 1:
+            messagebox.showwarning(title="Error",
+                                    message="GR can only be made into one bill at a time")
+            error = True
+            success_message = False
+
+        # Selecting at-least one bill for GR
+        if self.selected_mode == 3 and len(self.selected_bills) == 0:
+            messagebox.showwarning(title="Error",
+                                   message="Please select a bill to add GR in!")
+            error = True
+            success_message = False
+
+        # Selecting at-least one bill for Full Payments
+        if self.selected_mode == 1 and len(self.selected_bills) == 0:
+            messagebox.showwarning(title="Error",
+                                   message="Please select atleast 1 bill for Full Payment!")
+            error = True
+            success_message = False
+
+        # Selecting a  bill for part-payments
+        if (self.selected_mode == 2 and self.selected_partial == 1) and len(self.selected_bills) == 0:
+            messagebox.showwarning(title="Error",
+                                   message= "Please select a bill for Part Payment!")
+            error = True
+            success_message = False
 
         # if there is a error then execution
         if not error:

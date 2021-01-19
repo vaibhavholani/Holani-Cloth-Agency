@@ -48,6 +48,7 @@ class RegisterEntry:
         self.date = datetime.datetime.strptime(date, "%d/%m/%Y")
 
         # Deduction AMOUNT and Deduction PERCENT
+        self.gr_amount = 0
         self.d_amount = 0
         self.d_percent = 0
 

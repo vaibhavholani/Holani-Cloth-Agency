@@ -17,7 +17,7 @@ class Scrollable(tk.Frame):
         scrollbar = tk.Scrollbar(frame, width=width)
         scrollbar.pack(side=tk.RIGHT)
 
-        self.canvas = tk.Canvas(frame, yscrollcommand=scrollbar.set)
+        self.canvas = tk.Canvas(frame, yscrollcommand=scrollbar.set, width=530)
         self.canvas.pack(side=tk.LEFT)
 
         scrollbar.config(command=self.canvas.yview)
@@ -34,7 +34,7 @@ class Scrollable(tk.Frame):
         "Enlarge the windows item to the canvas width"
 
         canvas_width = event.width
-        self.canvas.itemconfig(self.windows_item, width =canvas_width)
+        self.canvas.itemconfig(self.windows_item, width=canvas_width)
 
     def update(self):
         "Update the canvas and the scrollregion"

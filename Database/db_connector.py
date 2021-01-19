@@ -32,3 +32,5 @@ def update() -> None:
     query = "UPDATE last_update SET updated_at = CURRENT_TIMESTAMP where updated_at = " \
             "CAST('{}' AS DATETIME);".format(local_timestamp)
     local_cursor.execute(query)
+
+    local_db.commit()

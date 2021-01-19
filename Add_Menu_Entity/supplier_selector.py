@@ -68,6 +68,8 @@ class Selector:
         listbox = Listbox(self.main_frame, name="listbox", selectmode=SINGLE,
                           width=100, yscrollcommand=scrollbar.set)
         listbox.insert(END, *self.master)
+        listbox.bind("<Return>", func=lambda event: self.on_select(
+            listbox.get(listbox.curselection())))
         listbox.grid(column=2, row=2)
 
         # Creating back button
@@ -91,7 +93,7 @@ class Selector:
     def update_list(self, search: str) -> None:
 
         self.suppliers = \
-            [element for element in self.master if search in element]
+            [element for element in self.master if search.upper() in element]
 
         listbox = self.main_frame.nametowidget("listbox")
         listbox.delete(0, END)

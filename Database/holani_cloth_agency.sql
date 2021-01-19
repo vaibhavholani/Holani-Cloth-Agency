@@ -37,6 +37,7 @@ CREATE TABLE register_entry (
 	register_date DATETIME,
 	amount DECIMAL(10, 2),
 	partial_amount DECIMAL(10,2) DEFAULT 0,
+	gr_amount INT DEFAULT 0,
 	bill_number INT,
 	status VARCHAR(2) DEFAULT 'N',
 	d_amount INT DEFAULT 0,
