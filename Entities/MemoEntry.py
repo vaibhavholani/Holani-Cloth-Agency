@@ -141,7 +141,6 @@ class MemoEntry:
                 bills.status = "PG"
             elif bills.status == "N":
                 bills.status = "G"
-            bills.gr_amount = self.amount
             bills.amount = bills.amount - self.amount
             bills.gr_amount = bills.gr_amount + self.amount
             self.inset_memo_bill_database(bills)
