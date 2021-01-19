@@ -102,6 +102,7 @@ def upload_memo_entry() -> None:
           "ON DUPLICATE KEY UPDATE memo_number=VALUES(memo_number), register_date=VALUES(register_date)"
     online_cursor.executemany(sql, new_data)
 
+    online_db.commit()
     local_db.disconnect()
     online_db.disconnect()
 
@@ -132,6 +133,7 @@ def upload_memo_payments() -> None:
           "VALUES (%s, %s, %s)"
     online_cursor.executemany(sql, new_data)
 
+    online_db.commit()
     local_db.disconnect()
     online_db.disconnect()
 
@@ -162,6 +164,7 @@ def upload_memo_bills() -> None:
           "VALUES (%s, %s, %s, %s)"
     online_cursor.executemany(sql, new_data)
 
+    online_db.commit()
     local_db.disconnect()
     online_db.disconnect()
 
@@ -192,6 +195,7 @@ def upload_gr_settle() -> None:
           "VALUES (%s, %s, %s, %s, %s)"
     online_cursor.executemany(sql, new_data)
 
+    online_db.commit()
     local_db.disconnect()
     online_db.disconnect()
 
@@ -222,6 +226,7 @@ def upload_account() -> None:
           "VALUES (%s, %s, %s, %s)"
     online_cursor.executemany(sql, new_data)
 
+    online_db.commit()
     local_db.disconnect()
     online_db.disconnect()
 

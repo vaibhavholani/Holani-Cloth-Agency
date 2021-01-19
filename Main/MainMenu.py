@@ -86,7 +86,7 @@ def download_button():
     local_timestamp = (local_cursor.fetchall())[0][0]
     online_cursor.execute(query)
     online_timestamp = (online_cursor.fetchall())[0][0]
-
+    download_db.download()
     if local_timestamp >= online_timestamp:
         messagebox.showinfo(title="Up to Date", message="Database Up-to-Date")
     else:
