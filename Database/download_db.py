@@ -55,16 +55,16 @@ def download_register_entry() -> None:
     # Getting new data
     query = "select id, supplier_id, party_id, register_date, amount, " \
             "partial_amount, bill_number, status, d_amount," \
-            " d_percent from register_entry where last_update > CAST('{}' AS DATETIME)".format(timestamp)
+            " d_percent, gr_amount from register_entry where last_update > CAST('{}' AS DATETIME)".format(timestamp)
     online_cursor.execute(query)
     new_data = online_cursor.fetchall()
 
     sql = "INSERT INTO register_entry (id, supplier_id, party_id, register_date, amount, " \
           "partial_amount, bill_number, status, " \
-          "d_amount, d_percent) " \
-          "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" \
+          "d_amount, d_percent, gr_amount) " \
+          "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)" \
           "ON DUPLICATE KEY UPDATE status=VALUES(status), partial_amount=VALUES(partial_amount)," \
-          " d_amount=VALUES(d_amount), d_percent=VALUES(d_percent)"
+          " d_amount=VALUES(d_amount), d_percent=VALUES(d_percent), gr_amount = VALUES(gr_amount)"
     local_cursor.executemany(sql, new_data)
 
     local_db.commit()
