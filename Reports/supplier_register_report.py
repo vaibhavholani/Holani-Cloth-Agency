@@ -17,11 +17,12 @@ def supplier_register(party_ids: List[int], supplier_ids: List[int], start_date:
     master_elements = [create_pdf.create_h1("Supplier Register"), hr_line]
 
     for supplier_id in supplier_ids:
+        top_elements = []
         elements = []
         supplier_name = retrieve_indivijual.get_supplier_name_by_id(supplier_id)
         h2text = "Supplier Name: " + supplier_name
-        elements.append(create_pdf.create_h2(h2text))
-        elements.append(hr_line)
+        top_elements.append(create_pdf.create_h2(h2text))
+        top_elements.append(hr_line)
         for party_id in party_ids:
             add_table = True
             register_data = retrieve_register_entry.get_supplier_register_data(supplier_id, party_id, start_date, end_date)
@@ -41,7 +42,9 @@ def supplier_register(party_ids: List[int], supplier_ids: List[int], start_date:
                 add_text = "Party Name: " + party_name
                 elements.append(create_pdf.create_h3(add_text))
                 elements.append(table)
-        master_elements = master_elements + elements
+            if len(elements) != 0:
+                master_elements = master_elements + top_elements + elements
+                master_elements.append(create_pdf.new_page())
 
     return master_elements
 

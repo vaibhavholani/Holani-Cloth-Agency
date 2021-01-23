@@ -689,8 +689,9 @@ class AddMemoEntry:
         """
         Updating the contents of the entry amount on the basis of the selected bills
         """
+        print(1)
         temp_amount = (((chk.cget("text")).split("INR"))[1]).strip()
-        amount = int(temp_amount.split(" ")[0])
+        amount = float(temp_amount.split(" ")[0])
         bill_number = int((((chk.cget("text")).split(" "))[0])[1:-1])
 
         if variable.get() == 0:
