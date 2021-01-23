@@ -61,6 +61,7 @@ CREATE TABLE memo_entry(
 	);
 
 CREATE TABLE memo_payments(
+    id INT AUTO_INCREMENT PRIMARY KEY,
 	memo_id INT, 
 	bank_id INT,
 	cheque_number INT,
@@ -70,6 +71,7 @@ CREATE TABLE memo_payments(
 	);
 
 CREATE TABLE memo_bills (
+    id INT AUTO_INCREMENT PRIMARY KEY,
 	memo_id INT, 
 	bill_number INT,
 	type VARCHAR(2),
@@ -90,6 +92,7 @@ CREATE TABLE gr_settle(
 );
 
 CREATE TABLE supplier_party_account(
+    id INT AUTO_INCREMENT PRIMARY KEY,
 	supplier_id INT,
 	party_id INT,
 	partial_amount INT DEFAULT 0,

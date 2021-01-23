@@ -115,7 +115,7 @@ def get_party_name_by_id(party_id: int) -> str:
     # Open a new connection
     db = db_connector.connect()
     cursor = db.cursor()
-
+    print(party_id)
     query = "select name from party where id = '{}';".format(party_id)
     cursor.execute(query)
     data = cursor.fetchall()
@@ -130,8 +130,13 @@ def get_party_id_by_name(party_name: str) -> int:
     # Open a new connection
     db = db_connector.connect()
     cursor = db.cursor()
-
-    query = "select id from party where name = '{}';".format(party_name)
+    use_name = ""
+    for chars in party_name:
+        if chars in ["'", '"']:
+            use_name = use_name + "%"
+        else:
+            use_name = use_name + chars
+    query = "select id from party where name LIKE '{}';".format(use_name)
     cursor.execute(query)
     data = cursor.fetchall()
     db.disconnect()
@@ -146,7 +151,13 @@ def get_party_address_by_name(party_name: str) -> str:
     db = db_connector.connect()
     cursor = db.cursor()
 
-    query = "select address from party where name = '{}';".format(party_name)
+    use_name = ""
+    for chars in party_name:
+        if chars in ["'", '"']:
+            use_name = use_name + "%"
+        else:
+            use_name = use_name + chars
+    query = "select address from party where name LIKE '{}';".format(use_name)
     cursor.execute(query)
     data = cursor.fetchall()
     db.disconnect()
@@ -206,8 +217,14 @@ def get_supplier_id_by_name(supplier_name: str) -> int:
     # Open a new connection
     db = db_connector.connect()
     cursor = db.cursor()
+    use_name = ""
+    for chars in supplier_name:
+        if chars in ["'", '"']:
+            use_name = use_name + "%"
+        else:
+            use_name = use_name+chars
 
-    query = "select id from supplier where name = '{}'".format(str(supplier_name))
+    query = "select id from supplier where name LIKE '{}'".format(str(use_name))
     cursor.execute(query)
     data = cursor.fetchall()
     db.disconnect()

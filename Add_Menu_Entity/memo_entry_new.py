@@ -302,7 +302,7 @@ class AddMemoEntry:
         # Loop to set the text of the check buttons as red, green, blue, purple
         for pick in self.pending_bills:
             amount = pick.amount - (pick.part_payment) - (pick.gr_amount) - (pick.d_amount) - \
-                     (pick.amount * pick.d_percent)
+                     (pick.amount * (pick.d_percent/100))
             text = "#" + str(pick.bill_number) + ", Amount: INR " + str(amount)
             if pick.status == "N":
                 self.checkbutton(text, "red")

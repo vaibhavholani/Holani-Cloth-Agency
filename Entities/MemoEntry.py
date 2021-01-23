@@ -71,7 +71,7 @@ class MemoEntry:
             update_register_entry.update_register_entry_data(bills)
         amount = self.amount
         if self.mode == "Full":
-            amount = (bills.amount-bills.part_payment)
+            amount = (bills.amount-bills.part_payment-bills.gr_amount-bills.d_amount-(bills.amount*(bills.d_percent/100)))
         MemoBill.call(self.memo_id, bills.bill_number, amount, bills.status)
 
     def get_memo_id(self) -> int:

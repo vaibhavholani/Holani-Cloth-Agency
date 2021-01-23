@@ -124,13 +124,15 @@ def upload_memo_payments() -> None:
     timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
-    query = "select memo_id, bank_id, cheque_number from memo_payments where last_update > CAST('{}' AS DATETIME)"\
+    query = "select id, memo_id, bank_id, cheque_number from memo_payments where last_update > CAST('{}' AS DATETIME)" \
         .format(timestamp)
     local_cursor.execute(query)
     new_data = local_cursor.fetchall()
 
-    sql = "INSERT INTO memo_payments (memo_id, bank_id, cheque_number)" \
-          "VALUES (%s, %s, %s)"
+    sql = "INSERT INTO memo_payments (id, memo_id, bank_id, cheque_number)" \
+          "VALUES (%s, %s, %s, %s)" \
+          "ON DUPLICATE KEY UPDATE memo_id=VALUES(memo_id), bank_id=VALUES(bank_id), " \
+          "cheque_number=VALUES(cheque_number)"
     online_cursor.executemany(sql, new_data)
 
     online_db.commit()
@@ -155,13 +157,15 @@ def upload_memo_bills() -> None:
     timestamp = (online_cursor.fetchall())[0][0]
 
     # Getting new data
-    query = "select memo_id, bill_number, type, amount from memo_bills where last_update > " \
+    query = "select id, memo_id, bill_number, type, amount from memo_bills where last_update > " \
             "CAST('{}' AS DATETIME)".format(timestamp)
     local_cursor.execute(query)
     new_data = local_cursor.fetchall()
 
-    sql = "INSERT INTO memo_bills (memo_id, bill_number, type, amount)" \
-          "VALUES (%s, %s, %s, %s)"
+    sql = "INSERT INTO memo_bills (id, memo_id, bill_number, type, amount)" \
+          "VALUES (%s, %s, %s, %s, %s)" \
+          "ON DUPLICATE KEY UPDATE memo_id=VALUES(memo_id), bill_number=VALUES(bill_number), type=VALUES(type), " \
+          "amount=VALUES(amount)"
     online_cursor.executemany(sql, new_data)
 
     online_db.commit()
