@@ -107,5 +107,5 @@ CREATE TABLE last_update(
 	updated_at TIMESTAMP
 );
 
-INSERT into last_update(updated_at) VALUES (CURRENT_TIMESTAMP);
+INSERT into last_update(updated_at) VALUES (CAST('2020-01-11' AS DATETIME));
 
