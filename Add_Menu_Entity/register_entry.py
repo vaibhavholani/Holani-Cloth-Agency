@@ -33,6 +33,7 @@ class AddRegisterEntry:
         self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
+        self.window.bind("<Escape>", lambda event: self.back_button())
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -56,11 +57,11 @@ class AddRegisterEntry:
         # Creating register_entry name label
         bill_number = Label(self.main_frame, text="Bill Number:")
         bill_number.grid(column=1, row=1)
-        bill_number.focus()
 
         # Creating register_entry name entry
         bill_number_entry = Entry(self.main_frame, width=100)
         bill_number_entry.grid(column=2, row=1, columnspan=5)
+        bill_number_entry.focus()
 
         # Creating date label
         date_label = Label(self.main_frame, text="Date: ")
@@ -98,6 +99,10 @@ class AddRegisterEntry:
                           width=100, yscrollcommand=scrollbar.set)
         listbox.insert(END, *self.party_names)
         listbox.grid(column=2, row=4, columnspan=5)
+        listbox.bind("<Return>", func=lambda event: amount_entry.focus())
+        register_entry_search.bind("<Return>", lambda event: self.listbox_smart_select(listbox))
+        listbox.bind("<Down>", lambda event: self.down_arrow(listbox))
+        listbox.bind("<Up>", lambda event: self.up_arrow(listbox))
 
         # Creating register_entry amount label
         amount_label = Label(self.main_frame,
@@ -107,6 +112,11 @@ class AddRegisterEntry:
         # Creating register_entry amount entry
         amount_entry = Entry(self.main_frame, width=100)
         amount_entry.grid(column=2, row=5, columnspan=5)
+        amount_entry.bind("<Return>", lambda event: self.create_button(
+            bill_number_entry.get(),
+            amount_entry.get(),
+            "{}/{}/{}".format(date_entry1.get(), date_entry2.get(), date_entry3.get()),
+            listbox.get(listbox.curselection())))
 
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
@@ -140,6 +150,29 @@ class AddRegisterEntry:
         self.create_main_frame()
         self.window.mainloop()
 
+    def down_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr < listbox.size() - 1:
+            curr += 1
+        else:
+            curr = 0
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def up_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr > 0:
+            curr -= 1
+        else:
+            curr = listbox.size() - 1
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def listbox_smart_select(self, listbox: Listbox):
+        listbox.focus()
+        listbox.select_set(0)
+        listbox.activate(0)
+
     def create_button(self, bill: str, amount: str, date: str, party_name: str) -> None:
 
         try:
@@ -163,7 +196,7 @@ class AddRegisterEntry:
     def update_list(self, search: str) -> None:
 
         self.selected_parties = \
-            [element for element in self.party_names if search in element]
+            [element for element in self.party_names if search.upper() in element]
 
         listbox = self.main_frame.nametowidget("listbox")
         listbox.delete(0, END)

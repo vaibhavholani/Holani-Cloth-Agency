@@ -6,13 +6,12 @@ from Main import show_pdf
 
 
 def khata_report(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str) -> List:
-
     """
     Return a 2D list of all pdf elements for Khata Report
     """
 
     table_header = ("Bill Date", "Bill No.", "Bill Amt",
-                    "Status", "Memo No.", "Memo Amt", "Memo Date", "M.Type")
+                    "Status", "Memo No.", "Memo Amt", "Memo Date", "M.Type", "Chk. Amt")
 
     hr_line = create_pdf.create_horizontal_line()
 

@@ -10,11 +10,19 @@ def insert_memo_entry(entry: MemoEntry) -> None:
     db = db_connector.connect()
     cursor = db.cursor()
 
-    sql = "INSERT INTO memo_entry (supplier_id, party_id, register_date, memo_number) " \
-          "VALUES (%s, %s, %s, %s)"
-    val = (entry.supplier_id, entry.party_id, str(entry.date), entry.memo_number)
+    if entry.mode == "Good Return":
+        sql = "INSERT INTO memo_entry (supplier_id, party_id, register_date, memo_number, gr_amount) " \
+            "VALUES (%s, %s, %s, %s, %s)"
+        val = (entry.supplier_id, entry.party_id, str(entry.date), entry.memo_number, entry.amount)
 
-    cursor.execute(sql, val)
+        cursor.execute(sql, val)
+    else:
+        sql = "INSERT INTO memo_entry (supplier_id, party_id, register_date, memo_number, amount) " \
+              "VALUES (%s, %s, %s, %s, %s)"
+        val = (entry.supplier_id, entry.party_id, str(entry.date), entry.memo_number, entry.amount)
+
+        cursor.execute(sql, val)
+
     db.commit()
 
     db.disconnect()

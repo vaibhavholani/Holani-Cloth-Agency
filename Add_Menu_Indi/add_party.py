@@ -30,6 +30,7 @@ class AddParty:
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
         self.window.title("Add Party")
+        self.window.bind("<Escape>", lambda event: self.back())
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame

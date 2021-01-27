@@ -9,7 +9,7 @@ from typing import List, Tuple
 import datetime
 from Database import Lists, retrieve_memo_entry, retrieve_indivijual, insert_memo_entry, update_register_entry
 from Database import insert_register_entry, retrieve_partial_payment, update_partial_amount, insert_partial_payment
-from Database import insert_gr, retrieve_gr, update_gr
+from Database import insert_gr, retrieve_gr, update_gr, update_memo_entry
 from Database import retrieve_register_entry
 from Entities import RegisterEntry, MemoBill
 
@@ -61,6 +61,8 @@ class MemoEntry:
         """
         if retrieve_memo_entry.check_add_memo(self.memo_number, self.date_string):
             insert_memo_entry.insert_memo_entry(self)
+        else:
+            update_memo_entry.update_memo_entry_data(self)
         insert_memo_entry.insert_memo_payemts(self)
 
     def inset_memo_bill_database(self, bills: RegisterEntry) -> None:

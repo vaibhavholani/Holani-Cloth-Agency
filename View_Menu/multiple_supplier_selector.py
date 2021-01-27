@@ -26,7 +26,7 @@ class Selector:
     def __init__(self, start_date: str, end_date: str) -> None:
         self.window = tkinter.Tk()
         self.window.title("Choose Suppliers")
-
+        self.window.bind("<Escape>", lambda event: self.back_button())
         # Creating the main frame
         self.main_frame = Frame(self.window)
 
@@ -149,7 +149,7 @@ class Selector:
         listbox.insert(END, *self.suppliers)
 
     def on_select_add(self, select: str):
-        if select not in self.selected_names:
+        if select.upper() not in self.selected_names:
             bisect.insort(self.selected_names, select)
             listbox2 = self.main_right_frame.nametowidget("listbox2")
             listbox2.delete(0, END)

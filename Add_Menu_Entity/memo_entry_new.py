@@ -43,6 +43,7 @@ class AddMemoEntry:
         self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
+        self.window.bind("<Escape>", lambda event: self.back_button())
 
         # Creating top frame
         self.top_frame = Frame(self.window, highlightbackground="black",
@@ -400,7 +401,6 @@ class AddMemoEntry:
         self.payment_info.remove(selected_entry)
         self.update_payment_list()
 
-
     def update_payment_list(self):
         """
         Refresh the selected options
@@ -511,6 +511,14 @@ class AddMemoEntry:
             error = True
             success_message = False
 
+        # GR Mode
+        if (self.selected_mode == 3) and int(amount) > self.total:
+            messagebox.showwarning(title="Error", message="Memo amount: {} greater than max sum "
+                                                              "amount of bills {}".format(amount, str(
+                    self.total)))
+            error = True
+            success_message = False
+
         # In partial amount cant be used in GR and part no bills
         if (self.selected_mode == 3 or self.selected_partial == 2) and self.use_partial == 1:
             messagebox.showwarning(title="Error", message="Partial Amount can't be used in GR or Partial No-bill Entry")
@@ -530,13 +538,6 @@ class AddMemoEntry:
         if (self.selected_mode == 2 and self.selected_partial == 1) and len(self.selected_bills) > 1:
             messagebox.showwarning(title="Error",
                                    message= "Partial Payment In-Bill can only be made into one bill at a time")
-            error = True
-            success_message = False
-
-        # Restricting GR bill entries to only one
-        if self.selected_mode == 3 and len(self.selected_bills) > 1:
-            messagebox.showwarning(title="Error",
-                                    message="GR can only be made into one bill at a time")
             error = True
             success_message = False
 
@@ -581,7 +582,20 @@ class AddMemoEntry:
                     self.memo_partial_random(int_memo_number, int_amount, date, self.payment_info)
             elif self.selected_mode == 3:
                 # Goods Return Mode
-                self.memo_goods_return(int_memo_number, int_amount, date, self.payment_info)
+                allocate_amt = int_amount
+                for bills in self.selected_bills:
+                    bill = retrieve_register_entry.get_register_entry(self.supplier_id, self.party_id, int(bills))[0]
+                    if bill.amount < allocate_amt and allocate_amt != 0:
+                        print("bill amount:", bill.amount)
+                        print("allocate amount:", allocate_amt)
+                        self.memo_goods_return(int_memo_number, bill.amount, date, self.payment_info, [bills])
+                        allocate_amt = allocate_amt - bill.amount
+                        print(allocate_amt)
+                    elif allocate_amt != 0:
+                        self.memo_goods_return(int_memo_number, allocate_amt, date, self.payment_info, [bills])
+                        allocate_amt = 0
+
+
 
         """Displaying success message if memo created"""
         if success_message:
@@ -649,7 +663,8 @@ class AddMemoEntry:
                                           self.party_name,
                                           amount, date, payment_info, self.selected_bills)
 
-    def memo_goods_return(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple]):
+    def memo_goods_return(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple],
+                          selected_bills: List[str]):
         """
         Creating memos goods return Mode
         """
@@ -660,7 +675,7 @@ class AddMemoEntry:
         else:
             MemoEntry.call_gr(memo_number, self.supplier_name,
                               self.party_name,
-                              amount, date, payment_info, self.selected_bills)
+                              amount, date, payment_info, selected_bills)
 
     def back_button(self) -> None:
         """
@@ -676,7 +691,6 @@ class AddMemoEntry:
         self.window.destroy()
         MainMenu.execute()
 
-
     def extend_memo(self, memo_number: str, amount: str, date: str, bank_name: str, cheque_number: str):
         """
         Implements the use of extend memo option
@@ -689,9 +703,8 @@ class AddMemoEntry:
         """
         Updating the contents of the entry amount on the basis of the selected bills
         """
-        print(1)
         temp_amount = (((chk.cget("text")).split("INR"))[1]).strip()
-        amount = float(temp_amount.split(" ")[0])
+        amount = int(float(temp_amount.split(" ")[0]))
         bill_number = int((((chk.cget("text")).split(" "))[0])[1:-1])
 
         if variable.get() == 0:

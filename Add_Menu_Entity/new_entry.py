@@ -24,7 +24,7 @@ class AddWindow:
 
     """
 
-    options = ["Register Entry", "Memo Entry", "GR Entry"]
+    options = ["Register Entry", "Memo Entry"]
 
     def __init__(self) -> None:
         self.window = tkinter.Tk()
@@ -32,6 +32,7 @@ class AddWindow:
         self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
+        self.window.bind("<Escape>", lambda event: self.back())
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -50,7 +51,10 @@ class AddWindow:
         # Creating Spinner
         category_spinner = OptionMenu(self.main_frame, self.string_var, *self.options)
         category_spinner.grid(column=2, row=1)
-        category_spinner.bind("<Return>", func= lambda event: self.on_select(self.string_var.get()))
+        category_spinner.bind("<Return>", func=lambda event: self.on_select(self.string_var.get()))
+        category_spinner.bind("<Down>", func=lambda event: self.down_arrow())
+        category_spinner.bind("<Up>", func=lambda event: self.down_arrow())
+        category_spinner.focus()
 
         # Creating Select Button
         select_button = Button(self.main_frame, text="Select",
@@ -58,6 +62,7 @@ class AddWindow:
                                lambda:
                                self.on_select(self.string_var.get()))
         select_button.grid(column=3, row=1)
+        self.window.bind("<Return>", lambda event: self.on_select(self.string_var.get()))
 
         # Creating back button
         back_button = Button(self.bottom_frame, text="<<Back",
@@ -68,6 +73,11 @@ class AddWindow:
         self.bottom_frame.grid(column=0, row=1)
 
     # def callback(self, variable: StringVar):
+    def down_arrow(self):
+        if self.string_var.get() == "Register Entry":
+            self.string_var.set(self.options[1])
+        else:
+            self.string_var.set(self.options[0])
 
     def on_select(self, select: str):
 

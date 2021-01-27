@@ -1,0 +1,28 @@
+from __future__ import annotations
+from Entities import MemoEntry
+from Database import db_connector, retrieve_memo_entry
+
+
+def update_memo_entry_data(entry: MemoEntry) -> None:
+    """
+    Update changes made to  a memo_entry
+    """
+    # Open a new connection
+    db = db_connector.connect()
+    cursor = db.cursor()
+
+    entry_id = retrieve_memo_entry.get_id_by_memo_number(entry.memo_number, entry.supplier_id, entry.party_id)
+
+    if entry.mode != "Good Return":
+        query = "UPDATE memo_entry SET amount = amount + '{}' " \
+                "WHERE id = {}"\
+            .format(entry.amount, entry_id)
+    else:
+        query = "UPDATE memo_entry SET gr_amount = gr_amount + '{}' " \
+                "WHERE id = {}" \
+            .format(entry.amount, entry_id)
+
+    cursor.execute(query)
+    db.commit()
+    db.disconnect()
+    db_connector.update()

@@ -30,6 +30,7 @@ class AddWindow:
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
         self.window.title("Add Menu")
+        self.window.bind("<Escape>", lambda event: self.back())
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -48,6 +49,7 @@ class AddWindow:
         # Creating Spinner
         category_spinner = OptionMenu(self.main_frame, self.string_var,  *self.options)
         category_spinner.grid(column=2, row=1)
+        category_spinner.bind("<Return>", func=lambda event: self.on_select(self.string_var.get()))
 
         # Creating Select Button
         select_button = Button(self.main_frame, text="Select",

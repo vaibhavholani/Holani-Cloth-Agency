@@ -31,6 +31,7 @@ class ReportSelector:
 
         self.window = tkinter.Tk()
         self.window.title("Report Menu")
+        self.window.bind("<Escape>", lambda event: self.back())
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame

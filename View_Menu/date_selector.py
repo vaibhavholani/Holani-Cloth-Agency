@@ -22,6 +22,7 @@ class DateSelector:
         # The main window
         self.window = tkinter.Tk()
         self.window.title("Date Selector")
+        self.window.bind("<Escape>", lambda event: self.back_button())
         # Creating top frame
         self.first_frame = Frame(self.window, highlightbackground="black",
                                  highlightcolor="black",

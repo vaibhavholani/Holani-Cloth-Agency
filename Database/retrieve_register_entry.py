@@ -152,17 +152,15 @@ def get_khata_data_by_date(supplier_id: int, party_id: int, start_date: str, end
     cursor.execute(query)
     bills_data = cursor.fetchall()
 
-    print(bills_data)
     for bills in bills_data:
         query_2 = "select memo_entry.memo_number, memo_bills.amount,DATE_FORMAT(memo_entry.register_date, '%d/%m/%Y'), " \
-                  "memo_bills.type from memo_entry JOIN memo_bills on (memo_entry.id = memo_bills.memo_id) " \
+                  "memo_bills.type, memo_entry.amount " \
+                  "from memo_entry JOIN memo_bills on (memo_entry.id = memo_bills.memo_id) " \
                   "where memo_bills.bill_number = '{}' AND memo_entry.supplier_id = '{}' " \
                   "AND memo_entry.party_id = '{}'; " \
             .format(bills[0], supplier_id, party_id)
         cursor.execute(query_2)
         memo_data = cursor.fetchall()
-
-        print(memo_data)
 
         for nums in range(len(memo_data)):
             if nums == 0:

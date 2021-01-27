@@ -28,6 +28,7 @@ class Selector:
         self.window.geometry("1500x600")
         self.window.rowconfigure(0, weight=1)
         self.window.grid_columnconfigure(0, weight=1)
+        self.window.bind("<Escape>", lambda event: self.back_button())
         # Creating the main frame
         self.main_frame = Frame(self.window)
         # Creating bottom_frame
@@ -80,6 +81,9 @@ class Selector:
         listbox.grid(column=2, row=2)
         listbox.bind("<Return>", func=lambda event: self.on_select(
             listbox.get(listbox.curselection())))
+        search_entry.bind("<Return>", lambda event: self.listbox_smart_select(listbox))
+        listbox.bind("<Down>", lambda event: self.down_arrow(listbox))
+        listbox.bind("<Up>", lambda event: self.up_arrow(listbox))
 
         # Creating back button
         back_button = Button(self.bottom_frame, text="<<Back",
@@ -107,6 +111,29 @@ class Selector:
         listbox = self.main_frame.nametowidget("listbox")
         listbox.delete(0, END)
         listbox.insert(END, *self.suppliers)
+
+    def down_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr < listbox.size() - 1:
+            curr += 1
+        else:
+            curr = 0
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def up_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr > 0:
+            curr -= 1
+        else:
+            curr = listbox.size() - 1
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def listbox_smart_select(self, listbox: Listbox):
+        listbox.focus()
+        listbox.select_set(0)
+        listbox.activate(0)
 
     def on_select(self, select: str):
         self.window.destroy()
