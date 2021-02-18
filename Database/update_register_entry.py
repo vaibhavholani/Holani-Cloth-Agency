@@ -8,8 +8,7 @@ def update_register_entry_data(entry: RegisterEntry) -> None:
     Update changes made to the register entry by a memo_entry
     """
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     entry_id = retrieve_register_entry.get_register_entry_id(entry.supplier_id, entry.party_id, entry.bill_number)
 
@@ -18,6 +17,7 @@ def update_register_entry_data(entry: RegisterEntry) -> None:
         .format(entry.part_payment, entry.status, entry.d_amount, entry.d_percent, entry.gr_amount, entry_id)
 
     cursor.execute(query)
+    db_connector.add_stack(query)
     db.commit()
     db.disconnect()
     db_connector.update()

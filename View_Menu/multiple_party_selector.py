@@ -25,7 +25,7 @@ class Selector:
 
     """
 
-    def __init__(self, start_date: str, end_date: str, supplier_names: List[str]) -> None:
+    def __init__(self, start_date: str, end_date: str, supplier_ids: List[int]) -> None:
         self.window = tkinter.Tk()
         self.window.title("Choose Parties")
         self.window.bind("<Escape>", lambda event: self.back_button())
@@ -37,18 +37,20 @@ class Selector:
 
         # Creating a list of Selected Supplier Names
         self.selected_names = []
+        self.selected_ids = []
 
         # Creating bottom_frame
         self.bottom_frame = Frame(self.window)
 
         self.master = retrieve_indivijual.get_all_party_names()
+        self.master_id = retrieve_indivijual.get_all_party_id()
 
         # Creating an alias of the master copy of supplier names
         self.parties = self.master
 
         self.start_date = start_date
         self.end_date = end_date
-        self.supplier_names = supplier_names
+        self.supplier_ids = supplier_ids
 
     def create_main_frame(self) -> None:
 
@@ -78,6 +80,11 @@ class Selector:
                           width=100, yscrollcommand=scrollbar.set)
         listbox.insert(END, *self.master)
         listbox.grid(column=2, row=2)
+        listbox.bind("<Return>", func=lambda event: self.on_select_add(
+            listbox.get(listbox.curselection()), search_entry))
+        search_entry.bind("<Return>", lambda event: self.listbox_smart_select(listbox))
+        listbox.bind("<Down>", lambda event: self.down_arrow(listbox))
+        listbox.bind("<Up>", lambda event: self.up_arrow(listbox))
 
         # Creating back button
         back_button = Button(self.bottom_frame, text="<<Back",
@@ -87,7 +94,7 @@ class Selector:
         # Creating Add Button
         add_button = Button(self.bottom_frame, text="Add",
                                command=lambda: self.on_select_add(
-                                   listbox.get(listbox.curselection())))
+                                   listbox.get(listbox.curselection()), search_entry))
 
         add_button.grid(column=0, row=0, ipadx=20, padx=90, ipady=10,
                            pady=10)
@@ -144,33 +151,63 @@ class Selector:
     def update_list(self, search: str) -> None:
 
         self.parties = \
-            [element for element in self.master if search in element]
+            [element for element in self.master if search.upper() in element]
 
         listbox = self.main_frame.nametowidget("listbox")
         listbox.delete(0, END)
         listbox.insert(END, *self.parties)
 
-    def on_select_add(self, select: str):
+    def on_select_add(self, select: str, search_entry: Entry):
+        search_entry.focus()
+        index = self.master.index(select)
         if select.upper() not in self.selected_names:
             bisect.insort(self.selected_names, select)
+            bisect.insort(self.selected_ids,  self.master_id[index])
             listbox2 = self.main_right_frame.nametowidget("listbox2")
             listbox2.delete(0, END)
             listbox2.insert(END, *self.selected_names)
 
     def on_select_del(self, select: str):
+        index = self.master.index(select)
+        self.selected_ids.remove(self.master_id[index])
         self.selected_names.remove(select)
         listbox2 = self.main_right_frame.nametowidget("listbox2")
         listbox2.delete(0, END)
         listbox2.insert(END, *self.selected_names)
 
+    def down_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr < listbox.size() - 1:
+            curr += 1
+        else:
+            curr = 0
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def up_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr > 0:
+            curr -= 1
+        else:
+            curr = listbox.size() - 1
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def listbox_smart_select(self, listbox: Listbox):
+        listbox.focus()
+        listbox.select_set(0)
+        listbox.activate(0)
+
     def add_all(self):
         self.selected_names = self.master.copy()
+        self.selected_ids = self.master_id.copy()
         listbox2 = self.main_right_frame.nametowidget("listbox2")
         listbox2.delete(0, END)
         listbox2.insert(END, *self.selected_names)
 
     def del_all(self):
         self.selected_names = []
+        self.selected_ids = []
         listbox2 = self.main_right_frame.nametowidget("listbox2")
         listbox2.delete(0, END)
         listbox2.insert(END, *self.selected_names)
@@ -180,7 +217,7 @@ class Selector:
             messagebox.showwarning(title="No Party Selected", message="Please select a party")
         else:
             self.window.destroy()
-            report_selector.execute(self.start_date, self.end_date, self.supplier_names, self.selected_names)
+            report_selector.execute(self.start_date, self.end_date, self.supplier_ids, self.selected_ids)
 
     def callback(self, sv: StringVar):
         self.update_list(sv.get())
@@ -194,6 +231,6 @@ class Selector:
         multiple_supplier_selector.execute(self.start_date, self.end_date)
 
 
-def execute(sdate: str, edate: str, supplier_names: List[str]) -> None:
-    new_window = Selector(sdate, edate, supplier_names)
+def execute(sdate: str, edate: str, supplier_ids: List[int]) -> None:
+    new_window = Selector(sdate, edate, supplier_ids)
     new_window.show_main_window()

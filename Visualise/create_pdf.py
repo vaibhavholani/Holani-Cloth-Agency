@@ -170,7 +170,7 @@ def add_days_colour(table: LongTable, table_data: List[Tuple]) -> None:
     Add colour to the boxes on the basis of the number of days for pending payments
     """
 
-    for elements in range(1, len(table_data)):
+    for elements in range(1, len(table_data)-1):
 
         if elements % 3 == 1:
             bc = colors.lightgreen

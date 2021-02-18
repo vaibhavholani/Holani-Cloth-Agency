@@ -9,8 +9,7 @@ def check_new_memo(memo_number: int, memo_date: str, supplier_name: str, party_n
     Check if the memo already exists.
     """
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
     date = datetime.datetime.strptime(memo_date, "%d/%m/%Y")
 
     supplier_id = retrieve_indivijual.get_supplier_id_by_name(supplier_name)
@@ -36,8 +35,7 @@ def check_add_memo(memo_number: int, memo_date: str) -> bool:
     Check if the memo already exists.
     """
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
     date = datetime.datetime.strptime(memo_date, "%d/%m/%Y")
 
     query = "select register_date from memo_entry where memo_number = '{}' order by 1 DESC".format(
@@ -57,8 +55,7 @@ def get_id_by_memo_number(memo_number, supplier_id, party_id) -> int:
     Get the memo_id using memo_number, supplier_id and party_id
     """
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     query = "select id from memo_entry where memo_number = {} AND supplier_id = {} AND party_id = {} " \
             "order by register_date DESC;".format(

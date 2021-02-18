@@ -72,6 +72,7 @@ class MemoEntry:
         if not insert_register_entry.check_new_register(bills):
             update_register_entry.update_register_entry_data(bills)
         amount = self.amount
+
         if self.mode == "Full":
             amount = (bills.amount-bills.part_payment-bills.gr_amount-bills.d_amount-(bills.amount*(bills.d_percent/100)))
         MemoBill.call(self.memo_id, bills.bill_number, amount, bills.status)
@@ -102,7 +103,7 @@ class MemoEntry:
         for bills in self.selected_bills:
             bills.d_percent += self.d_percent
             bills.d_amount += self.d_amount
-            percent_amount = ((bills.d_amount/100)*bills.amount)
+            percent_amount = ((bills.d_percent/100)*bills.amount)
             if bills.status in ["P", "N", "G", "PG"] and \
                     (bills.amount - bills.part_payment - self.amount - bills.d_amount - percent_amount <= 0):
                 bills.status = "F"
@@ -118,7 +119,7 @@ class MemoEntry:
         """
         Adds partial payments without bills to the account of the supplier and party.
         """
-        Lists.insert_partial_data(self.supplier_name, self.party_name, self.amount)
+        # Lists.insert_partial_data(self.supplier_name, self.party_name, self.amount)
         # Call to log this memo_entry in memo_bills
         self.database_partial_payment()
 

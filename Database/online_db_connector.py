@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import Tuple
 import mysql.connector
 
 
@@ -15,13 +16,35 @@ def connect():
     return mydb
 
 
+def cursor() -> Tuple:
+    """
+    return the cursor and db connection
+    """
+    database = connect()
+    # db_connection = database.connect()
+    db_cursor = database.cursor()
+    query = "set time_zone = '-07:00';"
+    db_cursor.execute(query)
+    database.commit()
+
+    return database, db_cursor
+
+
+def execute_stack(query: str) -> None:
+    """
+    execute a query on the online database
+    """
+    # Online Database
+    online_db = connect()
+    online_cursor = online_db.cursor()
+    online_cursor.execute(query)
+
+
 def update() -> None:
     """
     Set the new timestamp
     """
-    # Local Database
-    online_db = connect()
-    online_cursor = online_db.cursor()
+    online_database, online_cursor = cursor()
 
     # get the last update timestamp
     query = "select updated_at from last_update"
@@ -32,4 +55,4 @@ def update() -> None:
     query = "UPDATE last_update SET updated_at = CURRENT_TIMESTAMP where updated_at = " \
             "CAST('{}' AS DATETIME);".format(local_timestamp)
     online_cursor.execute(query)
-    online_db.commit()
+    online_database.commit()

@@ -6,8 +6,9 @@ This class is used to select the report that needs to be seen,
 from __future__ import annotations
 from typing import List
 from View_Menu import multiple_party_selector
-from Database import retrieve_indivijual
+from Database import retrieve_indivijual, efficiency
 from Reports import khata_report, supplier_register_report, payment_list_report, payment_list_summary, grand_total_report
+from Reports import legacy_payment_list
 from Main import MainMenu
 
 import tkinter
@@ -25,9 +26,10 @@ class ReportSelector:
 
     """
 
-    options = ["Khata Report", "Supplier Register", "Payment List", "Payment List Summary", "Grand Total List"]
+    options = ["Khata Report", "Supplier Register", "Payment List", "Payment List Summary", "Grand Total List",
+               "Legacy Payment List"]
 
-    def __init__(self, start_date: str, end_date: str, supplier_names: List[str], party_names: List[str]) -> None:
+    def __init__(self, start_date: str, end_date: str, supplier_ids: List[int], party_ids: List[int]) -> None:
 
         self.window = tkinter.Tk()
         self.window.title("Report Menu")
@@ -42,8 +44,8 @@ class ReportSelector:
 
         self.start_date = start_date
         self.end_date = end_date
-        self.supplier_names = supplier_names
-        self.party_names = party_names
+        self.supplier_ids = supplier_ids
+        self.party_ids = party_ids
         self.show_main_window()
 
     def create_main_frame(self) -> None:
@@ -78,23 +80,23 @@ class ReportSelector:
 
     def on_select(self, select: str):
 
-        supplier_ids = retrieve_indivijual.get_supplier_ids_by_list(self.supplier_names)
-        party_ids = retrieve_indivijual.get_party_ids_by_list(self.party_names)
-
+        smart_ids = efficiency.smart_selection(self.supplier_ids, self.party_ids, self.start_date, self.end_date)
         if select == self.options[0]:
-            khata_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
+            khata_report.execute(smart_ids[0], smart_ids[1], self.start_date, self.end_date)
         elif select == self.options[1]:
-            supplier_register_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
+            supplier_register_report.execute(smart_ids[0], smart_ids[1], self.start_date, self.end_date)
         elif select == self.options[2]:
-            payment_list_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
+            payment_list_report.execute(smart_ids[0], smart_ids[1], self.start_date, self.end_date)
         elif select == self.options[3]:
-            payment_list_summary.execute(party_ids, supplier_ids, self.start_date, self.end_date)
+            payment_list_summary.execute(smart_ids[0], smart_ids[1], self.start_date, self.end_date)
+        elif select == self.options[4]:
+            grand_total_report.execute(smart_ids[0], smart_ids[1], self.start_date, self.end_date)
         else:
-            grand_total_report.execute(party_ids, supplier_ids, self.start_date, self.end_date)
+            legacy_payment_list.execute(smart_ids[0], smart_ids[1], self.start_date, self.end_date)
 
     def back(self):
         self.window.destroy()
-        multiple_party_selector.execute(self.start_date, self.end_date, self.supplier_names)
+        multiple_party_selector.execute(self.start_date, self.end_date, self.supplier_ids)
 
     def back_main_button(self) -> None:
         """
@@ -108,7 +110,7 @@ class ReportSelector:
         self.window.mainloop()
 
 
-def execute(start_date: str, end_date: str, supplier_names: List[str], party_names: List[str]):
-    new_window = ReportSelector(start_date, end_date, supplier_names, party_names)
+def execute(start_date: str, end_date: str, supplier_ids: List[int], party_ids: List[int]):
+    new_window = ReportSelector(start_date, end_date, supplier_ids, party_ids)
     new_window.show_main_window()
 

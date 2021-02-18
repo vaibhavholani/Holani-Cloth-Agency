@@ -5,16 +5,14 @@ from Entities import MemoEntry, MemoBill
 
 
 def insert_memo_entry(entry: MemoEntry) -> None:
-
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     if entry.mode == "Good Return":
         sql = "INSERT INTO memo_entry (supplier_id, party_id, register_date, memo_number, gr_amount) " \
             "VALUES (%s, %s, %s, %s, %s)"
         val = (entry.supplier_id, entry.party_id, str(entry.date), entry.memo_number, entry.amount)
-
+        db_connector.add_stack_val(sql, val)
         cursor.execute(sql, val)
     else:
         sql = "INSERT INTO memo_entry (supplier_id, party_id, register_date, memo_number, amount) " \
@@ -22,6 +20,7 @@ def insert_memo_entry(entry: MemoEntry) -> None:
         val = (entry.supplier_id, entry.party_id, str(entry.date), entry.memo_number, entry.amount)
 
         cursor.execute(sql, val)
+        db_connector.add_stack_val(sql, val)
 
     db.commit()
 
@@ -35,8 +34,7 @@ def insert_memo_payemts(entry: MemoEntry) -> None:
     """
 
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     memo_id = retrieve_memo_entry.get_id_by_memo_number(entry.memo_number, entry.supplier_id, entry.party_id)
 
@@ -46,6 +44,7 @@ def insert_memo_payemts(entry: MemoEntry) -> None:
           "VALUES (%s, %s, %s)"
 
     cursor.executemany(sql, payment_list)
+    db_connector.add_stack_val_multiple(sql, payment_list)
     db.commit()
 
     db.disconnect()
@@ -58,14 +57,14 @@ def insert_memo_bills(entry: MemoBill) -> None:
     """
 
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     sql = "INSERT INTO memo_bills (memo_id, bill_number, type, amount) " \
           "VALUES (%s, %s, %s, %s)"
     val = (entry.memo_id, entry.memo_number, entry.type, entry.amount)
 
     cursor.execute(sql, val)
+    db_connector.add_stack_val(sql, val)
     db.commit()
     db.disconnect()
     db_connector.update()

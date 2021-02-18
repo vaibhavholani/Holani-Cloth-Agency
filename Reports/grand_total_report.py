@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List, Tuple
 from Visualise import create_pdf
 from Database import retrieve_register_entry, retrieve_indivijual
+from Database import efficiency
 from Main import show_pdf
 
 
@@ -11,7 +12,7 @@ def grand_total_report(party_ids: List[int], supplier_ids: List[int], start_date
     Return a 2D list of all pdf elements for grand total Report
     """
 
-    table_header = ("Party Name", "Total Work", "Total GR")
+    table_header = ("Party Name", "Total Work")
 
     hr_line = create_pdf.create_horizontal_line()
 
@@ -22,13 +23,11 @@ def grand_total_report(party_ids: List[int], supplier_ids: List[int], start_date
     for party_id in party_ids:
         party_name = retrieve_indivijual.get_party_name_by_id(party_id)
         total_work = 0
-        total_gr = 0
-        for supplier_id in supplier_ids:
+        filter_suppliers = efficiency.filter_out_supplier(party_id, supplier_ids)
+        for supplier_id in filter_suppliers:
             grand_total_work = retrieve_register_entry.grand_total_work(supplier_id, party_id, start_date, end_date)
-            grand_total_gr = retrieve_register_entry.grand_total_gr(party_id, supplier_id, start_date, end_date)
             total_work += int(grand_total_work)
-            total_gr += int(grand_total_gr)
-        table_data.append((party_name, total_work, total_gr))
+        table_data.append((party_name, total_work))
 
     table_data.append(total_bottom_column(table_data))
     table = create_pdf.create_table(table_data)
@@ -46,14 +45,12 @@ def total_bottom_column(data: List) -> Tuple:
     Add up all the values
     """
     total_sum = 0
-    gr_sum = 0
 
     for x in range(1, len(data)):
         elements = data[x]
         total_sum += int(elements[1])
-        gr_sum += int(elements[2])
 
-    return "Total", str(total_sum), str(gr_sum)
+    return "Total", str(total_sum),
 
 
 def execute(party_ids: List[int], supplier_ids: List[int], start_date: str, end_date: str):

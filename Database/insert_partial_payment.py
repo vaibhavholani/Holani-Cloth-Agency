@@ -9,14 +9,14 @@ def insert_partial_payment(entry: MemoEntry) -> None:
     """
 
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     sql = "INSERT INTO supplier_party_account (supplier_id, party_id, partial_amount) " \
           "VALUES (%s, %s, %s)"
     val = (entry.supplier_id, entry.party_id, entry.amount)
 
     cursor.execute(sql, val)
+    db_connector.add_stack_val(sql, val)
     db.commit()
     db.disconnect()
     db_connector.update()

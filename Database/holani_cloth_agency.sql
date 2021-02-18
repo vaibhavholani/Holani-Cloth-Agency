@@ -3,7 +3,7 @@ CREATE TABLE supplier (
 	name VARCHAR(100),
 	address VARCHAR(300),
 	UNIQUE (name),
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 	);
 
 CREATE TABLE party (
@@ -11,7 +11,7 @@ CREATE TABLE party (
 	name VARCHAR(100),
 	address VARCHAR(300),
 	UNIQUE (name),
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 	);
 
 CREATE TABLE bank (
@@ -19,7 +19,7 @@ CREATE TABLE bank (
 	name VARCHAR(100),
 	address VARCHAR(300),
 	UNIQUE (name),
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 	);
 
 CREATE TABLE Transport (
@@ -27,7 +27,7 @@ CREATE TABLE Transport (
 	name VARCHAR(100),
 	address VARCHAR(300),
 	UNIQUE (name),
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 	);
 
 CREATE TABLE register_entry (
@@ -43,7 +43,7 @@ CREATE TABLE register_entry (
 	d_amount INT DEFAULT 0,
 	d_percent INT DEFAULT 0,
 	UNIQUE (bill_number, supplier_id, party_id, register_date),
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	FOREIGN KEY (party_id) REFERENCES party(id),
 	FOREIGN KEY (supplier_id) REFERENCES supplier(id)
 	);
@@ -55,7 +55,7 @@ CREATE TABLE memo_entry(
 	party_id INT, 
 	register_date DATETIME,
 	UNIQUE (memo_number, party_id, supplier_id, register_date),
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON CURRENT_TIMESTAMP,
 	amount INT default 0,
 	gr_amount INT default 0,
 	FOREIGN KEY (party_id) REFERENCES party(id),
@@ -67,7 +67,7 @@ CREATE TABLE memo_payments(
 	memo_id INT, 
 	bank_id INT,
 	cheque_number INT,
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	FOREIGN KEY (memo_id) REFERENCES memo_entry(id),
 	FOREIGN KEY (bank_id) REFERENCES bank(id)
 	);
@@ -78,7 +78,7 @@ CREATE TABLE memo_bills (
 	bill_number INT,
 	type VARCHAR(2),
 	amount INT,
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	FOREIGN KEY (memo_id) REFERENCES memo_entry(id)
 );
 
@@ -88,7 +88,7 @@ CREATE TABLE gr_settle(
 	start_date DATETIME,
 	end_date DATETIME,
 	settle_amount INT,
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	FOREIGN KEY (party_id) REFERENCES party(id),
 	FOREIGN KEY (supplier_id) REFERENCES supplier(id)
 );
@@ -100,13 +100,19 @@ CREATE TABLE supplier_party_account(
 	partial_amount INT DEFAULT 0,
 	gr_amount DECIMAL(10, 2) DEFAULT 0,
 	UNIQUE(supplier_id, party_id),
-	last_update TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+	last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	FOREIGN KEY (party_id) REFERENCES party(id),
 	FOREIGN KEY (supplier_id) REFERENCES supplier(id)
 	);
 
 CREATE TABLE last_update(
 	updated_at TIMESTAMP
+);
+
+CREATE TABLE stack(
+    query VARCHAR(500),
+    val VARCHAR(500),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT into last_update(updated_at) VALUES (CAST('2020-01-11' AS DATETIME));

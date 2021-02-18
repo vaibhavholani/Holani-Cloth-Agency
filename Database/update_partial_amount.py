@@ -8,8 +8,7 @@ def add_partial_amount(supplier_id: int, party_id: int, amount: int) -> None:
     """
 
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     partial_amount = int(retrieve_partial_payment.get_partial_payment(supplier_id, party_id))
     amount += partial_amount
@@ -29,8 +28,7 @@ def use_partial_amount(supplier_id: int, party_id: int, amount: int) -> None:
     """
 
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     partial_amount = int(retrieve_partial_payment.get_partial_payment(supplier_id, party_id))
     amount = partial_amount - amount
@@ -40,6 +38,7 @@ def use_partial_amount(supplier_id: int, party_id: int, amount: int) -> None:
         .format(amount, supplier_id, party_id)
 
     cursor.execute(query)
+    db_connector.add_stack(query)
     db.commit()
     db.disconnect()
     db_connector.update()

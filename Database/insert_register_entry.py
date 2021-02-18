@@ -9,8 +9,7 @@ def check_new_register(entry: RegisterEntry) -> bool:
     """
 
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     query = "select id from register_entry where bill_number = '{}' AND supplier_id = '{}' AND party_id = '{}'".format(
         entry.bill_number, entry.supplier_id, entry.party_id)
@@ -27,8 +26,7 @@ def insert_register_entry(entry: RegisterEntry) -> None:
     Insert a register_entry into the database.
     """
     # Open a new connection
-    db = db_connector.connect()
-    cursor = db.cursor()
+    db, cursor = db_connector.cursor()
 
     sql = "INSERT INTO register_entry (supplier_id, party_id, register_date, amount, bill_number, status, " \
           "d_amount, d_percent) " \
@@ -37,6 +35,7 @@ def insert_register_entry(entry: RegisterEntry) -> None:
            entry.d_amount, entry.d_percent)
 
     cursor.execute(sql, val)
+    db_connector.add_stack_val(sql, val)
     db.commit()
     db.disconnect()
     db_connector.update()

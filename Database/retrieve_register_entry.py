@@ -152,6 +152,9 @@ def get_khata_data_by_date(supplier_id: int, party_id: int, start_date: str, end
     cursor.execute(query)
     bills_data = cursor.fetchall()
 
+    if len(bills_data) == 0:
+        return bills_data
+
     for bills in bills_data:
         query_2 = "select memo_entry.memo_number, memo_bills.amount,DATE_FORMAT(memo_entry.register_date, '%d/%m/%Y'), " \
                   "memo_bills.type, memo_entry.amount " \
@@ -190,7 +193,8 @@ def get_supplier_register_data(supplier_id: int, party_id: int, start_date: str,
     end_date = str(datetime.datetime.strptime(end_date, "%d/%m/%Y"))
 
     query = "select bill_number, amount, " \
-            "partial_amount, (amount - (partial_amount))," \
+            "CASE WHEN status='F' THEN '0'" \
+            "ELSE (amount - (partial_amount)-(gr_amount)) END AS pending_amount," \
             "DATE_FORMAT(register_date, '%d/%m/%Y'), status from " \
             "register_entry JOIN party ON party.id = register_entry.party_id " \
             "where supplier_id = '{}' AND party_id = '{}' AND " \
@@ -215,7 +219,7 @@ def get_payment_list_data(supplier_id: int, party_id: int, start_date: str, end_
     end_date = str(datetime.datetime.strptime(end_date, "%d/%m/%Y"))
 
     query = "select bill_number, amount, " \
-            "partial_amount, (amount - (partial_amount))," \
+            "(amount - (partial_amount)-gr_amount)," \
             "DATE_FORMAT(register_date, '%d/%m/%Y'), " \
             "DATEDIFF(NOW(),register_date), " \
             "status from " \
@@ -242,19 +246,19 @@ def get_payment_list_summary_data(supplier_id: int, party_id: int, start_date: s
     end_date = str(datetime.datetime.strptime(end_date, "%d/%m/%Y"))
 
     # Find amount less than 40 days
-    query1 = "select SUM(amount), SUM(partial_amount), SUM(amount) - SUM(partial_amount)" \
+    query1 = "select SUM(amount), SUM(amount) - SUM(partial_amount) - SUM(gr_amount)" \
              "from register_entry where party_id = '{}' AND supplier_id = '{}'" \
              " AND status != 'F' AND DATEDIFF(NOW(), register_date) < 40 AND register_date >= '{}' " \
              "AND register_date <= '{}';".format(party_id, supplier_id, start_date, end_date)
 
     # Find amount between 40 and 70 days
-    query2 = "select SUM(amount), SUM(partial_amount), SUM(amount) - SUM(partial_amount) " \
+    query2 = "select SUM(amount), SUM(amount) - SUM(partial_amount) - SUM(gr_amount) " \
              "from register_entry where party_id = '{}' AND supplier_id = '{}' " \
              "AND status != 'F' AND DATEDIFF(NOW(), register_date) BETWEEN 40 AND 70 AND register_date >= '{}' AND " \
              "register_date <= '{}';".format(party_id, supplier_id, start_date, end_date)
 
     # Find amount more than 70 days
-    query3 = "select SUM(amount), SUM(partial_amount), SUM(amount) - SUM(partial_amount) " \
+    query3 = "select SUM(amount), SUM(amount) - SUM(partial_amount) - SUM(gr_amount) " \
              "from register_entry where party_id = '{}' AND supplier_id = '{}' " \
              "AND status != 'F' AND 70 < DATEDIFF(NOW(), register_date) AND register_date >= '{}' " \
              "AND register_date <= '{}';".format(party_id, supplier_id, start_date, end_date)
@@ -318,12 +322,12 @@ def legacy_no_memo(curr_pld: Tuple) -> List[Tuple]:
     """
     Returns legacy payment bill with no memos
     """
-    if curr_pld[5] < 40:
-        bill_tuple = [("-", "-", "-", "-", "-", curr_pld[3], curr_pld[0], curr_pld[4])]
-    elif 40 <= curr_pld[5] <= 70:
-        bill_tuple = [("-", "-", "-", "-", curr_pld[3], "-", curr_pld[0], curr_pld[4])]
+    if curr_pld[4] < 40:
+        bill_tuple = [("-", "-", "-","-", "-", "-", curr_pld[2], curr_pld[0], curr_pld[3])]
+    elif 40 <= curr_pld[4] <= 70:
+        bill_tuple = [("-", "-", "-", "-", "-", curr_pld[2], "-", curr_pld[0], curr_pld[3])]
     else:
-        bill_tuple = [("-", "-", "-", curr_pld[3], "-", "-", curr_pld[0], curr_pld[4])]
+        bill_tuple = [("-", "-", "-", "-", curr_pld[2], "-", "-", curr_pld[0], curr_pld[3])]
 
     return bill_tuple
 
@@ -332,12 +336,12 @@ def legacy_one_memo(curr_pld: Tuple, curr_memo: Tuple) -> List[Tuple]:
     """
     Returns legacy payment bill with one memo
     """
-    if curr_pld[5] < 40:
-        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], "-", "-", curr_pld[3], curr_pld[0], curr_pld[4])]
-    elif 40 <= curr_pld[5] <= 70:
-        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], "-", curr_pld[3], "-", curr_pld[0], curr_pld[4])]
+    if curr_pld[4] < 40:
+        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], curr_memo[3], "-", "-", curr_pld[2], curr_pld[0], curr_pld[3])]
+    elif 40 <= curr_pld[4] <= 70:
+        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], curr_memo[3], "-", curr_pld[2], "-", curr_pld[0], curr_pld[3])]
     else:
-        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], curr_pld[3], "-", "-", curr_pld[0], curr_pld[4])]
+        bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], curr_memo[3], curr_pld[2], "-", "-", curr_pld[0], curr_pld[3])]
 
     return bill_tuple
 
@@ -346,7 +350,7 @@ def legacy_multiple_memo(curr_memo: Tuple) -> List[Tuple]:
     """
     Returns legacy payment bill with multiple memos
     """
-    bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], "-", "-", "-", "-", "-")]
+    bill_tuple = [(curr_memo[0], curr_memo[1], curr_memo[2], curr_memo[3], "-", "-", "-", "-", "-")]
     return bill_tuple
 
 
@@ -362,10 +366,12 @@ def legacy_payment_list(supplier_id: int, party_id: int, start_date: str, end_da
     p_l_d = get_payment_list_data(supplier_id, party_id, start_date, end_date)
 
     bills_data = [data[0] for data in p_l_d]
+    print(type(bills_data[0]))
 
     memo_data = []
     for bills in bills_data:
-        query_2 = "select memo_entry.memo_number, memo_bills.amount, memo_entry.register_date " \
+        query_2 = "select memo_entry.memo_number, memo_bills.amount, memo_bills.type, " \
+                  "DATE_FORMAT(memo_entry.register_date, '%d/%m/%Y') " \
                   "from memo_entry JOIN memo_bills on (memo_entry.id = memo_bills.memo_id) " \
                   "where memo_bills.bill_number = '{}' AND memo_entry.supplier_id = '{}' " \
                   "AND memo_entry.party_id = '{}'; " \
@@ -375,7 +381,7 @@ def legacy_payment_list(supplier_id: int, party_id: int, start_date: str, end_da
         memo_data.append(add_memo_data)
 
     legacy_data = []
-    for entry in range(len(memo_data)):
+    for entry in range(len(bills_data)):
 
         curr_pld = p_l_d[entry]
         curr_memo = memo_data[entry]

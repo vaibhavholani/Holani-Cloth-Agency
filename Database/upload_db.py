@@ -10,8 +10,8 @@ def upload_individual() -> None:
 
     individual_list = ["supplier", "party", "bank", "Transport"]
 
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
+    # Open a new connection
+    local_db, local_cursor = db_connector.cursor()
 
     online_db = online_db_connector.connect()
     online_cursor = online_db.cursor()
@@ -44,8 +44,8 @@ def upload_register_entry() -> None:
     Add all the new and updated register entries to the online database
     """
 
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
+    # Open a new connection
+    local_db, local_cursor = db_connector.cursor()
 
     online_db = online_db_connector.connect()
     online_cursor = online_db.cursor()
@@ -80,8 +80,8 @@ def upload_memo_entry() -> None:
     Add all the new and updated register entries to the online database
     """
 
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
+    # Open a new connection
+    local_db, local_cursor = db_connector.cursor()
 
     online_db = online_db_connector.connect()
     online_cursor = online_db.cursor()
@@ -112,8 +112,8 @@ def upload_memo_payments() -> None:
     Add all the new and updated register entries to the online database
     """
 
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
+    # Open a new connection
+    local_db, local_cursor = db_connector.cursor()
 
     online_db = online_db_connector.connect()
     online_cursor = online_db.cursor()
@@ -145,8 +145,8 @@ def upload_memo_bills() -> None:
     Add all the new and updated register entries to the online database
     """
 
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
+    # Open a new connection
+    local_db, local_cursor = db_connector.cursor()
 
     online_db = online_db_connector.connect()
     online_cursor = online_db.cursor()
@@ -178,8 +178,8 @@ def upload_gr_settle() -> None:
     Add all the new and updated register entries to the online database
     """
 
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
+    # Open a new connection
+    local_db, local_cursor = db_connector.cursor()
 
     online_db = online_db_connector.connect()
     online_cursor = online_db.cursor()
@@ -209,8 +209,8 @@ def upload_account() -> None:
     Add all the new and updated register entries to the online database
     """
 
-    local_db = db_connector.connect()
-    local_cursor = local_db.cursor()
+    # Open a new connection
+    local_db, local_cursor = db_connector.cursor()
 
     online_db = online_db_connector.connect()
     online_cursor = online_db.cursor()

@@ -35,11 +35,13 @@ class Selector:
 
         # Creating a list of Selected Supplier Names
         self.selected_names = []
+        self.selected_ids = []
 
         # Creating bottom_frame
         self.bottom_frame = Frame(self.window)
 
         self.master = retrieve_indivijual.get_all_supplier_names()
+        self.master_id = retrieve_indivijual.get_all_supplier_id()
 
         # Creating an alias of the master copy of supplier names
         self.suppliers = self.master
@@ -60,6 +62,7 @@ class Selector:
         # Creating Search Entry
         search_entry = Entry(self.main_frame, textvariable=sv, width=100)
         search_entry.focus()
+
         search_entry.grid(column=2, row=1)
 
         # Creating Choose Label
@@ -75,6 +78,11 @@ class Selector:
                           width=100, yscrollcommand=scrollbar.set)
         listbox.insert(END, *self.master)
         listbox.grid(column=2, row=2)
+        listbox.bind("<Return>", func=lambda event: self.on_select_add(
+            listbox.get(listbox.curselection()), search_entry))
+        search_entry.bind("<Return>", lambda event: self.listbox_smart_select(listbox))
+        listbox.bind("<Down>", lambda event: self.down_arrow(listbox))
+        listbox.bind("<Up>", lambda event: self.up_arrow(listbox))
 
         # Creating back button
         back_button = Button(self.bottom_frame, text="<<Back",
@@ -84,7 +92,7 @@ class Selector:
         # Creating Add Button
         add_button = Button(self.bottom_frame, text="Add",
                             command=lambda: self.on_select_add(
-                                listbox.get(listbox.curselection())))
+                                listbox.get(listbox.curselection()), search_entry))
 
         add_button.grid(column=0, row=0, ipadx=20, padx=90, ipady=10,
                         pady=10)
@@ -92,20 +100,22 @@ class Selector:
         # Creating Select Button
         select_button = Button(self.bottom_frame, text="Select",
                                command=lambda: self.on_select())
-
+        # self.window.bind('s', lambda event: self.on_select())
         select_button.grid(column=0, row=1, columnspan=2, ipadx=20, padx=90, ipady=10,
                            pady=10)
 
         # Creating Select All Button
         select_all_button = Button(self.bottom_frame, text="Select All",
                                    command=lambda: self.add_all())
+        # self.window.bind('a', lambda event: self.add_all())
         select_all_button.grid(column=2, row=0, ipadx=20, padx=90, ipady=10,
                                pady=10)
 
         # Creating Select All Button
-        select_all_button = Button(self.bottom_frame, text="Delete All",
+        delete_all_button = Button(self.bottom_frame, text="Delete All",
                                    command=lambda: self.del_all())
-        select_all_button.grid(column=3, row=0, ipadx=20, padx=90, ipady=10,
+        # self.window.bind('d', lambda event: self.del_all())
+        delete_all_button.grid(column=3, row=0, ipadx=20, padx=90, ipady=10,
                                pady=10)
         self.main_frame.grid(column=0, row=0)
         self.bottom_frame.grid(column=0, row=2)
@@ -142,20 +152,50 @@ class Selector:
     def update_list(self, search: str) -> None:
 
         self.suppliers = \
-            [element for element in self.master if search in element]
+            [element for element in self.master if search.upper() in element]
 
         listbox = self.main_frame.nametowidget("listbox")
         listbox.delete(0, END)
         listbox.insert(END, *self.suppliers)
 
-    def on_select_add(self, select: str):
+    def down_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr < listbox.size() - 1:
+            curr += 1
+        else:
+            curr = 0
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def up_arrow(self, listbox: Listbox):
+        curr = listbox.curselection()[0]
+        if curr > 0:
+            curr -= 1
+        else:
+            curr = listbox.size() - 1
+        listbox.selection_clear(0, END)
+        listbox.select_set(curr)
+
+    def listbox_smart_select(self, listbox: Listbox):
+        listbox.focus()
+        listbox.select_set(0)
+        listbox.activate(0)
+
+    def on_select_add(self, select: str, search_entry: Entry):
+        search_entry.focus()
+        index = self.master.index(select)
         if select.upper() not in self.selected_names:
             bisect.insort(self.selected_names, select)
+            print(index)
+            print(self.master_id[index])
+            bisect.insort(self.selected_ids, self.master_id[index])
             listbox2 = self.main_right_frame.nametowidget("listbox2")
             listbox2.delete(0, END)
             listbox2.insert(END, *self.selected_names)
 
     def on_select_del(self, select: str):
+        index = self.master.index(select)
+        self.selected_ids.remove(self.master_id[index])
         self.selected_names.remove(select)
         listbox2 = self.main_right_frame.nametowidget("listbox2")
         listbox2.delete(0, END)
@@ -163,12 +203,14 @@ class Selector:
 
     def add_all(self):
         self.selected_names = self.master.copy()
+        self.selected_ids = self.master_id.copy()
         listbox2 = self.main_right_frame.nametowidget("listbox2")
         listbox2.delete(0, END)
         listbox2.insert(END, *self.selected_names)
 
     def del_all(self):
         self.selected_names = []
+        self.selected_ids = []
         listbox2 = self.main_right_frame.nametowidget("listbox2")
         listbox2.delete(0, END)
         listbox2.insert(END, *self.selected_names)
@@ -178,7 +220,7 @@ class Selector:
             messagebox.showwarning(title="No supplier Selected", message="Please select a supplier")
         else:
             self.window.destroy()
-            multiple_party_selector.execute(self.start_date, self.end_date, self.selected_names)
+            multiple_party_selector.execute(self.start_date, self.end_date, self.selected_ids)
 
     def callback(self, sv: StringVar):
         self.update_list(sv.get())

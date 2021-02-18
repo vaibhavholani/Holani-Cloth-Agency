@@ -55,6 +55,7 @@ class AddMemoEntry:
 
         # Creating the main-left frame
         self.left_frame = Frame(self.main_frame)
+        self.deduct_frame = Frame(self.left_frame)
 
         # Creating the main-right frame
         self.right_frame = Frame(self.main_frame)
@@ -107,6 +108,11 @@ class AddMemoEntry:
         self.memo_entry_amount_entry = Entry(self.left_frame, width=50)
         self.memo_entry_amount_entry.insert(0, str(self.total))
 
+        # Deduction mode tracker label
+        self.use_deduct = 0
+        self.deduction_mode = 0
+        self.d_percent = 0
+        self.d_amount = 0
 
         # Creating Selected bills list
         self.selected_bills = []
@@ -218,28 +224,13 @@ class AddMemoEntry:
         delete_button = Button(self.left_frame, text="Delete", command= lambda: self.delete_button(listbox.get(listbox.curselection())))
         delete_button.grid(column=3, row=10)
 
-        # Creating Deduction Detail
-        add_label = Label(self.left_frame, text="Deduction Detail Percent: ")
-        add_label.grid(column=1, row=11)
-        add_entry = Entry(self.left_frame, width=50)
-        add_entry.insert(0, str(0))
-        add_entry.grid(column=2, row=11, columnspan=5)
+        deduct_tracker = IntVar()
+        deduct_checkbox = Checkbutton(self.left_frame, text="Deduction amount?", variable=deduct_tracker,
+                                   fg="gray")
+        deduct_checkbox.grid(column=1, row=11)
+        deduct_tracker.trace("w", lambda *args, v=deduct_tracker: self.use_deduct_listener(deduct_tracker))
 
-        # Creating Deduction Detail
-        deduct_label = Label(self.left_frame, text="Deduction Detail Amount: ")
-        deduct_label.grid(column=1, row=12)
-        deduct_entry = Entry(self.left_frame, width=50)
-        deduct_entry.insert(0, str(0))
-        deduct_entry.grid(column=2, row=12, columnspan=5)
-
-        # # Creating Deduction Detail
-        # gr_label = Label(self.left_frame, text="GR Amount: ")
-        # gr_label.grid(column=1, row=13)
-        # gr_entry = Entry(self.left_frame, width=50)
-        # gr_entry.insert(0, str(0))
-        # gr_entry.grid(column=2, row=13, columnspan=5)
-
-
+        add_entry, deduct_entry = self.create_deduction_frame()
         self.partial_mode_radiobutton()
         self.create_check_frame()
 
@@ -251,7 +242,7 @@ class AddMemoEntry:
                                    self.memo_number_entry.get(),
                                    self.memo_entry_amount_entry.get(),
                                    "{}/{}/{}".format(self.date_entry1.get(),self.date_entry2.get(),self.date_entry3.get()),
-                                   deduct_entry.get(), add_entry.get() ))
+                                   self.d_percent, self.d_amount))
 
         # Creating create button
         create_button = Button(self.bottom_frame, text="Create",
@@ -288,6 +279,73 @@ class AddMemoEntry:
 
         self.bottom_frame.grid(column=0, row=2)
 
+    def create_deduction_frame(self) -> Tuple:
+        """
+        Add a deduction frame
+        """
+        # Creating Deduction Detail
+        sv = StringVar()
+        add_label = Label(self.deduct_frame, text="Deduction Detail Percent: ")
+        add_label.grid(column=0, row=1)
+        add_entry = Entry(self.deduct_frame,textvariable=sv, width=50)
+        sv.trace("w", lambda name, index, mode, sv=sv: self.update_deduct_percent(sv))
+        add_entry.insert(0, str(0))
+        add_entry.grid(column=1, row=1)
+
+        # Creating Deduction Detail
+        deduct_label = Label(self.deduct_frame, text="Deduction Detail Amount: ")
+        # deduct_label.grid(column=0, row=2)
+
+        sv1 = StringVar()
+        deduct_entry = Entry(self.deduct_frame, width=50, textvariable=sv1)
+        sv1.trace("w", lambda name, index, mode, sv=sv1: self.update_deduct_amount(
+            sv1))
+        deduct_entry.insert(0, str(0))
+        # deduct_entry.grid(column=1, row=2)
+
+        deduct_tracker = IntVar()
+        deduct_checkbox = Checkbutton(self.deduct_frame, text="Tick for amount", variable=deduct_tracker)
+        deduct_checkbox.grid(column=0, row=0)
+        deduct_tracker.trace("w", lambda *args, v=deduct_tracker: self.deduction_flipper(deduct_tracker, add_label,
+                                                                                         add_entry, deduct_label,
+                                                                                         deduct_entry))
+
+        return add_entry, deduct_entry
+
+    def deduction_flipper(self, track: IntVar, add_label: Label, add_entry: Entry, deduct_label: Label, deduct_entry: Entry):
+        if track.get() == 0:
+            self.deduction_mode = 0
+            deduct_label.grid_forget()
+            deduct_entry.grid_forget()
+            add_label.grid(column=0, row=1)
+            add_entry.grid(column=1, row=1)
+
+        else:
+            self.deduction_mode = 1
+            add_label.grid_forget()
+            add_entry.grid_forget()
+            deduct_label.grid(column=0, row=1)
+            deduct_entry.grid(column=1, row=1)
+
+    def update_deduct_amount(self, var: StringVar):
+        val = var.get()
+        try:
+            int(val)
+            self.d_amount = int(val)
+        except ValueError:
+            self.d_amount = 0
+        self.d_percent = 0
+        self.total_outstanding()
+
+    def update_deduct_percent(self, var:StringVar):
+        val = var.get()
+        try:
+            int(val)
+            self.d_percent = int(val)
+        except ValueError:
+            self.d_percent = 0
+        self.d_amount = 0
+        self.total_outstanding()
     def create_check_frame(self):
         """
         Creating the frame that add all the pending bills into checkbox format which can be selected.
@@ -417,6 +475,7 @@ class AddMemoEntry:
         error = False
         success_message = True
         try:
+            amount = (amount.split("."))[0]
             int(amount)
         except ValueError:
             error = True
@@ -439,44 +498,47 @@ class AddMemoEntry:
 
         # Check the deduction detail
         try:
-            int(d_amount)
-            int(d_percent)
-            if int(d_percent) > 100:
-                raise ValueError
+            if self.use_deduct == 1:
+                if self.deduction_mode == 1:
+                    int(d_amount)
+                else:
+                    int(d_percent)
+
         except ValueError:
             error = True
             success_message = False
-            messagebox.showwarning(title="Error", message="Deduction Percent and Amount must be a number and "
-                                                          "deduction percent must be less than 100.")
+            messagebox.showwarning(title="Error", message="Deduction detail or Deduction Percent must be a vaild number")
 
         try:
-            if int(d_amount) != 0 and int(d_percent) != 0:
+            if (self.use_deduct == 1 and self.deduction_mode == 0) and (self.d_percent < 0 or self.d_percent > 100):
                 raise ValueError
         except ValueError:
             error = True
             success_message = False
-            messagebox.showwarning(title="Error", message="Both deduction detail and percentage cant be used at the "
-                                                          "same time, please only use one.")
+            messagebox.showwarning(title="Error", message="Deduction Percent must be between 0 and 100 inclusive.")
 
         try:
-            if (int(d_amount) != 0 or int(d_percent) != 0) and len(self.selected_bills) > 1:
+            if (self.use_deduct == 1 and self.deduction_mode == 1) and len(self.selected_bills) > 1:
                 raise ValueError
         except ValueError:
             error = True
             success_message = False
-            messagebox.showwarning(title="Error", message="Deduction Detail can only be provided for only one bill "
-                                                          "at a time. Please only select one bill.")
-
-        try:
-            if (int(d_amount) != 0 or int(d_percent) != 0) and len(self.selected_bills) > 1:
-                raise ValueError
-        except ValueError:
-            error = True
-            success_message = False
-            messagebox.showwarning(title="Error", message="Deduction Detail can only be provided for only one bill "
+            messagebox.showwarning(title="Error", message="Deduction \"Amount\"can only be provided for only one bill "
                                                           "at a time. Please only select one bill.")
 
 
+        try:
+            if (self.use_deduct == 1) and ((self.d_amount > self.total) or self.d_amount<0):
+                raise ValueError
+        except ValueError:
+            error = True
+            success_message = False
+            messagebox.showwarning(title="Error", message="Deduction \"Amount\" is more than the sum of bill {}.".format(self.total))
+
+        if self.use_deduct == 1 and self.selected_mode != 1:
+            messagebox.showwarning(title="Error", message="Deduction detail can only be applied for full payments")
+            error = True
+            success_message = False
 
         # Checking if no mode is selected
         if self.selected_mode not in [1, 2, 3]:
@@ -488,7 +550,7 @@ class AddMemoEntry:
         if (self.selected_mode == 1 and len(self.payment_info) == 0 and self.use_partial == 0) or \
                 (self.selected_mode == 2  and self.use_partial == 0
                  and len(self.payment_info) == 0):
-            messagebox.showwarning(title="Error", message="A bank must be selected")
+            messagebox.showwarning(title="Error", message="A payment method must be selected")
             error = True
             success_message = False
 
@@ -499,13 +561,14 @@ class AddMemoEntry:
 
         # Amount Checks
         # Full Mode
-        if self.selected_mode == 1 and int(amount) != self.total:
-            messagebox.showwarning(title="Error", message="Memo amount: {} greater than sum "
+        use_amount = self.total - self.d_amount - (self.d_percent*0.01*self.total)
+        if self.selected_mode == 1 and int(amount) != use_amount:
+            messagebox.showwarning(title="Error", message="Memo amount: {} is not equal to sum "
                                                           "amount of bills {}".format(amount, str(self.total)))
             error = True
             success_message = False
-
-        if self.selected_mode == 2 and self.selected_partial == 1 and int(amount) > self.total:
+        # partial_mode
+        if self.selected_mode == 2 and self.selected_partial == 1 and int(amount) > use_amount:
             messagebox.showwarning(title="Error", message="Memo amount: {} greater than max sum "
                                                           "amount of bill partial payment {}".format(amount, str(self.total)))
             error = True
@@ -530,6 +593,13 @@ class AddMemoEntry:
             messagebox.showwarning(title="Error",
                                     message="Total Memo Amount {} is more than total partial amount {}. "
                                             "Must add more payment information! ".format(self.total,
+                                                                                        self.partial_amount))
+            error = True
+            success_message = False
+        if self.use_partial == 1 and int(amount) < self.partial_amount and len(self.payment_info) != 0:
+            messagebox.showwarning(title="Error",
+                                   message="Total Memo Amount {} is less than total partial amount {}. "
+                                           "Either remove bank information or dont use the partial amount! ".format(self.total,
                                                                                         self.partial_amount))
             error = True
             success_message = False
@@ -562,12 +632,29 @@ class AddMemoEntry:
             error = True
             success_message = False
 
-        # if there is a error then execution
+        if (int(amount)) < 0:
+            messagebox.showwarning(title="Error",
+                                   message="Amount cant be less than 0")
+            error = True
+            success_message = False
+
+        if (int(memo_number)) < 0:
+            messagebox.showwarning(title="Error",
+                                   message="Memo Number cant be less than 0")
+            error = True
+            success_message = False
+
+        # if there is no error then execution
         if not error:
             int_amount = int(amount)
             int_memo_number = int(memo_number)
-            d_amount = int(d_amount)
-            d_percent = int(d_percent)
+            if self.use_deduct == 1:
+                d_amount = int(d_amount)
+                d_percent = int(d_percent)
+            else:
+                d_amount = int(d_amount)
+                d_percent = int(d_percent)
+
             """Separate execution of different modes"""
             if self.selected_mode == 1:
                 # Full Mode
@@ -585,11 +672,13 @@ class AddMemoEntry:
                 allocate_amt = int_amount
                 for bills in self.selected_bills:
                     bill = retrieve_register_entry.get_register_entry(self.supplier_id, self.party_id, int(bills))[0]
-                    if bill.amount < allocate_amt and allocate_amt != 0:
-                        print("bill amount:", bill.amount)
+                    amount = (bill.amount - bill.part_payment - bill.gr_amount - bill.d_amount - (
+                                bill.amount * (bill.d_percent / 100)))
+                    if amount < allocate_amt and allocate_amt != 0:
+                        print("bill amount:", amount)
                         print("allocate amount:", allocate_amt)
-                        self.memo_goods_return(int_memo_number, bill.amount, date, self.payment_info, [bills])
-                        allocate_amt = allocate_amt - bill.amount
+                        self.memo_goods_return(int_memo_number, amount, date, self.payment_info, [bills])
+                        allocate_amt = allocate_amt - amount
                         print(allocate_amt)
                     elif allocate_amt != 0:
                         self.memo_goods_return(int_memo_number, allocate_amt, date, self.payment_info, [bills])
@@ -609,24 +698,13 @@ class AddMemoEntry:
         """
         Creating memos on Full Payment Mode
         """
-        # Checking if enough amount is paid
-        if amount < self.total:
-            messagebox.showwarning(title="Error",
-                                   message=
-                                   "The minimum amount paid must be INR{}".format(self.total))
-        else:
-            # Check if the partial_amount between supplier and party is being used
-            use_amount = amount
-            if d_amount != 0:
-                use_amount = amount - d_amount
-            elif d_percent != 0:
-                use_amount = amount - ((d_percent/100)*amount)
-            if self.use_partial == 1:
-                update_partial_amount.use_partial_amount(self.supplier_id, self.party_id, use_amount)
 
-            MemoEntry.call_full(memo_number, self.supplier_name,
+        if self.use_partial == 1:
+            update_partial_amount.use_partial_amount(self.supplier_id, self.party_id, amount)
+
+        MemoEntry.call_full(memo_number, self.supplier_name,
                                 self.party_name,
-                                use_amount, date, payment_info, self.selected_bills, d_amount, d_percent)
+                                amount, date, payment_info, self.selected_bills, d_amount, d_percent)
 
     def memo_partial_bill(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple], d_amount: int, d_percent: int):
         """
@@ -637,18 +715,12 @@ class AddMemoEntry:
             messagebox.showwarning(title="Error",
                                    message="Amount should be more than INR 0")
         else:
-            # Check if the partial_amount between supplier and party is being used
-            use_amount = amount
-            if d_amount != 0:
-                use_amount = amount - d_amount
-            elif d_percent != 0:
-                use_amount = amount - ((d_percent / 100) * amount)
             if self.use_partial == 1:
-                update_partial_amount.use_partial_amount(self.supplier_id, self.party_id, use_amount)
+                update_partial_amount.use_partial_amount(self.supplier_id, self.party_id, amount)
 
             MemoEntry.call_partial_bill(memo_number, self.supplier_name,
                                         self.party_name,
-                                        use_amount, date, payment_info, self.selected_bills, d_amount, d_percent)
+                                        amount, date, payment_info, self.selected_bills, d_amount, d_percent)
 
     def memo_partial_random(self, memo_number: int, amount: int, date: str, payment_info: List[Tuple]):
         """
@@ -709,13 +781,15 @@ class AddMemoEntry:
 
         if variable.get() == 0:
             self.total = self.total - amount
+            new_total = self.total + self.deduct_from_total()
             self.selected_bills.remove(bill_number)
         else:
             self.total += amount
+            new_total = self.total + self.deduct_from_total()
             self.selected_bills.append(bill_number)
 
         self.memo_entry_amount_entry.delete(0, "end")
-        self.memo_entry_amount_entry.insert(0, str(self.total))
+        self.memo_entry_amount_entry.insert(0, str(new_total))
 
     def use_partial_listener(self, variable: IntVar):
         """
@@ -723,6 +797,16 @@ class AddMemoEntry:
         """
         self.use_partial = variable.get()
 
+    def use_deduct_listener(self, variable: IntVar):
+        """
+        shows and hides the deduct window
+        """
+        if variable.get() == 1:
+            self.use_deduct = 1
+            self.deduct_frame.grid(column=1, row=12, columnspan=6)
+        else:
+            self.use_deduct = 0
+            self.deduct_frame.grid_forget()
     def mode_selection(self, variable: IntVar):
         """
         Checks the current mode selected by the user, and updated the amount option
@@ -777,11 +861,20 @@ class AddMemoEntry:
         """
         Gives the total amount that the party needs to pay the supplier
         """
-        total = 0
-        for bill in self.pending_bills:
-            if bill.status in ["N", "P"]:
-                total += (bill.amount - bill.part_payment)
-        return total
+        new_total = self.total + self.deduct_from_total()
+        self.memo_entry_amount_entry.delete(0, "end")
+        self.memo_entry_amount_entry.insert(0, str(new_total))
+
+    def deduct_from_total(self) -> None:
+        if self.use_deduct == 1:
+            if self.deduction_mode == 1:
+                print("amount", self.d_amount)
+                return -self.d_amount
+            else:
+                print("percent", self.d_percent)
+                return -self.total* self.d_percent*0.01
+        else:
+            return 0
 
     def set_extend(self, memo_number, memo_date):
         self.memo_number_entry.insert(0, str(memo_number))

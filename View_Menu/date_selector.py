@@ -39,18 +39,33 @@ class DateSelector:
         """
         Add the elements in all frames
         """
+        # making text variables
+        # Creating StringVar
+        sdate = StringVar()
+        sdate.trace("w", lambda name, index, mode, sv=sdate: self.callback_md(sv, sdate_month))
+        smonth = StringVar()
+        smonth.trace("w", lambda name, index, mode, sv=smonth: self.callback_md(sv, sdate_year))
+        syear = StringVar()
+        syear.trace("w", lambda name, index, mode, sv=syear: self.callback_year(sv, edate_day))
+
+        edate = StringVar()
+        edate.trace("w", lambda name, index, mode, sv=edate: self.callback_md(sv, edate_month))
+        emonth = StringVar()
+        emonth.trace("w", lambda name, index, mode, sv=emonth: self.callback_md(sv, edate_year))
+
+        # making entries
         start_date_label = Label(self.first_frame, text="Starting Date: ")
         start_date_label.pack(side=LEFT)
-        sdate_day = Entry(self.first_frame)
+        sdate_day = Entry(self.first_frame, textvariable=sdate)
         sdate_day.focus()
         sdate_day.pack(side=LEFT)
         s_slash1 = Label(self.first_frame, text="/ ")
         s_slash1.pack(side=LEFT)
-        sdate_month = Entry(self.first_frame)
+        sdate_month = Entry(self.first_frame, textvariable=smonth)
         sdate_month.pack(side=LEFT)
         s_slash2 = Label(self.first_frame, text="/ ")
         s_slash2.pack(side=LEFT)
-        sdate_year = Entry(self.first_frame)
+        sdate_year = Entry(self.first_frame, textvariable=syear)
         sdate_year.pack(side=LEFT)
 
         self.first_frame.grid(row=1, column=0, pady=10, padx=10)
@@ -58,16 +73,22 @@ class DateSelector:
         # Creating Second Frame
         end_date_label = Label(self.second_frame, text="Ending Date: ")
         end_date_label.pack(side=LEFT)
-        edate_day = Entry(self.second_frame)
+        edate_day = Entry(self.second_frame,textvariable=edate)
         edate_day.pack(side=LEFT)
         e_slash1 = Label(self.second_frame, text="/ ")
         e_slash1.pack(side=LEFT)
-        edate_month = Entry(self.second_frame)
+        edate_month = Entry(self.second_frame, textvariable=emonth)
         edate_month.pack(side=LEFT)
         e_slash2 = Label(self.second_frame, text="/ ")
         e_slash2.pack(side=LEFT)
         edate_year = Entry(self.second_frame)
         edate_year.pack(side=LEFT)
+        edate_year.bind("<Return>", lambda event: self.select_button(sdate_day.get(),
+                                                                        sdate_month.get(),
+                                                                        sdate_year.get(),
+                                                                        edate_day.get(),
+                                                                        edate_month.get(),
+                                                                        edate_year.get()))
 
         self.second_frame.grid(row=2, column=0, pady=10, padx=10)
 
@@ -128,6 +149,15 @@ class DateSelector:
         self.create_all_frames()
 
         self.window.mainloop()
+
+    def callback_md(self, sv: StringVar, entry: Entry):
+        if len(sv.get()) ==2:
+            entry.focus()
+
+    def callback_year(self, sv: StringVar, entry: Entry):
+        if len(sv.get()) ==4:
+            entry.focus()
+
 
     def back_button(self):
         self.window.destroy()
