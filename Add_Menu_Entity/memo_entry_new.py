@@ -87,26 +87,38 @@ class AddMemoEntry:
 
         # Extend Memo Options
         self.memo_number_entry = Entry(self.left_frame, width=50)
+        self.memo_number_entry.bind("<Return>", func= lambda event: self.date_entry1.focus())
         # Creating memo_number entry
         self.memo_number_entry.grid(column=2, row=3, columnspan=5)
         self.memo_number_entry.insert(0, str(memo_number))
 
         # Date Entry
-        self.date_entry1 = Entry(self.left_frame, width=10)
+        self.sdate = StringVar()
+        self.smonth = StringVar()
+        self.syear = StringVar()
+        self.date_entry1 = Entry(self.left_frame, width=10, textvariable=self.sdate)
+        self.memo_number_entry.bind("<Return>", func=lambda event: self.date_entry1.focus())
         self.date_entry1.insert(0, str(date1))
         Label(self.left_frame, text=" / ").grid(column=3, row=4)
         Label(self.left_frame, text=" / ").grid(column=5, row=4)
         self.date_entry1.grid(column=2, row=4)
-        self.date_entry2 = Entry(self.left_frame, width=10)
+        self.date_entry2 = Entry(self.left_frame, width=10, textvariable=self.smonth)
+        self.date_entry1.bind("<Return>", func=lambda event: self.date_entry2.focus())
         self.date_entry2.insert(0, str(date2))
         self.date_entry2.grid(column=4, row=4)
-        self.date_entry3 = Entry(self.left_frame, width=20)
+        self.date_entry3 = Entry(self.left_frame, width=20, textvariable=self.syear)
+        self.date_entry2.bind("<Return>", func=lambda event: self.date_entry3.focus())
         self.date_entry3.insert(0, str(date3))
         self.date_entry3.grid(column=6, row=4)
+        self.sdate.trace("w", lambda name, index, mode, sv=self.sdate: self.callback_md(sv, self.date_entry2))
+        self.smonth.trace("w", lambda name, index, mode, sv=self.smonth: self.callback_md(sv, self.date_entry3))
+
+
 
         # Setting Dynamic Entry for Memo Entry amount
         self.memo_entry_amount_entry = Entry(self.left_frame, width=50)
         self.memo_entry_amount_entry.insert(0, str(self.total))
+        self.syear.trace("w", lambda name, index, mode, sv=self.syear: self.callback_year(sv, self.memo_entry_amount_entry))
 
         # Deduction mode tracker label
         self.use_deduct = 0
@@ -190,6 +202,7 @@ class AddMemoEntry:
 
         # Creating memo_entry amount entry
         self.memo_entry_amount_entry.grid(column=2, row=5, columnspan= 5)
+        self.date_entry3.bind("<Return>", func=lambda event: self.memo_entry_amount_entry.focus())
 
         # Creating Part Label
         self.use_partial_amount()
@@ -199,12 +212,14 @@ class AddMemoEntry:
         bank_label.grid(column=1, row=6)
         bank_drop_down = OptionMenu(self.left_frame, self.bank_tracker, *self.bank_names)
         bank_drop_down.grid(column=2, row=6, columnspan= 5)
-
+        self.memo_entry_amount_entry.bind("<Return>", func= lambda event: bank_drop_down.focus())
         # Creating payment cheque_number
         cheque_label = Label(self.left_frame, text="Cheque Number: ")
         cheque_label.grid(column=1, row=7)
         cheque_entry = Entry(self.left_frame, width=50)
         cheque_entry.grid(column=2, row=7, columnspan= 5)
+        cheque_entry.bind("<Return>", func= lambda event: self.add_button(self.bank_tracker.get(),
+                                                                                           cheque_entry.get()) )
 
         # Listbox scrollbar
         scrollbar = Scrollbar(self.left_frame)
@@ -891,6 +906,13 @@ class AddMemoEntry:
         self.window.destroy()
         execute(self.supplier_name, self.party_name, memo_date1, memo_date2, memo_date3, memo_number)
 
+    def callback_md(self, sv: StringVar, entry: Entry):
+        if len(sv.get()) ==2:
+            entry.focus()
+
+    def callback_year(self, sv: StringVar, entry: Entry):
+        if len(sv.get()) ==4:
+            entry.focus()
 
 def validate(date_text: str):
     """

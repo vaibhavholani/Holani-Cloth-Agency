@@ -58,6 +58,7 @@ class AddRegisterEntry:
         bill_number = Label(self.main_frame, text="Bill Number:")
         bill_number.grid(column=1, row=1)
 
+
         # Creating register_entry name entry
         bill_number_entry = Entry(self.main_frame, width=100)
         bill_number_entry.grid(column=2, row=1, columnspan=5)
@@ -68,17 +69,22 @@ class AddRegisterEntry:
         date_label.grid(column=1, row=2)
 
         # Creating date entry
-        date_entry1 = Entry(self.main_frame, width=10)
-        date_entry1.insert(0, str(self.today.day))
+        sdate = StringVar()
+        smonth = StringVar()
+        syear = StringVar()
+        date_entry1 = Entry(self.main_frame, width=10, textvariable=sdate)
+        bill_number_entry.bind("<Return>", func=lambda event: date_entry1.focus())
         Label(self.main_frame, text=" / ").grid(column=3, row=2)
         Label(self.main_frame, text=" / ").grid(column=5, row=2)
         date_entry1.grid(column=2, row=2)
-        date_entry2 = Entry(self.main_frame, width=10)
-        date_entry2.insert(0, str(self.today.month))
+        date_entry2 = Entry(self.main_frame, width=10, textvariable=smonth)
         date_entry2.grid(column=4, row=2)
-        date_entry3 = Entry(self.main_frame, width=20)
-        date_entry3.insert(0, str(self.today.year))
+        date_entry3 = Entry(self.main_frame, width=20, textvariable=syear)
         date_entry3.grid(column=6, row=2)
+
+        sdate.trace("w", lambda name, index, mode, sv=sdate: self.callback_md(sv, date_entry2))
+        smonth.trace("w", lambda name, index, mode, sv=smonth: self.callback_md(sv, date_entry3))
+        syear.trace("w", lambda name, index, mode, sv=syear: self.callback_year(sv, register_entry_search))
 
         search_label = Label(self.main_frame,
                                            text="Party Name: ")
@@ -149,6 +155,14 @@ class AddRegisterEntry:
     def show_main_window(self) -> None:
         self.create_main_frame()
         self.window.mainloop()
+
+    def callback_md(self, sv: StringVar, entry: Entry):
+        if len(sv.get()) ==2:
+            entry.focus()
+
+    def callback_year(self, sv: StringVar, entry: Entry):
+        if len(sv.get()) ==4:
+            entry.focus()
 
     def down_arrow(self, listbox: Listbox):
         curr = listbox.curselection()[0]
